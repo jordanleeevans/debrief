@@ -12,3 +12,11 @@ def health_check():
         "message": "Debfrief API is running",
         "settings": Settings().dict(),
     }
+
+
+from app.models.schemas import GameStats
+
+
+@app.post("/schemas/test")
+def test_game_stats(game_stats: GameStats):
+    return game_stats
