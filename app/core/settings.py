@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     MONGODB_DB: str = "scoreboard_db"
     MONGODB_USER: str = "admin"
     MONGODB_PASSWORD: str = "password"
+    DISCORD_BOT_TOKEN: str = "secret_token"
 
     class Config:
         env_file = ".env"

@@ -13,6 +13,7 @@ SND_SCORE_MAX = 6
 OVERLOAD_SCORE_MAX = 8
 HARDPOINT_SCORE_MAX = 250
 
+
 class WeaponStats(BaseModel):
     """Base model for weapon statistics."""
 
@@ -21,7 +22,9 @@ class WeaponStats(BaseModel):
         ge=0, lte=ELIM_RATIO_MAX, description="Elimination to death ratio"
     )
     damage_dealt: int = Field(ge=0, lte=DMG_MAX, description="Total damage dealt")
-    headshot_kills: int = Field(ge=0, lte=ELIM_MAX, description="Number of headshot kills")
+    headshot_kills: int = Field(
+        ge=0, lte=ELIM_MAX, description="Number of headshot kills"
+    )
     headshot_percentage: float = Field(
         ge=0, lte=PERCENTAGE_MAX, description="Percentage of shots that were headshots"
     )
@@ -41,7 +44,9 @@ class SecondaryWeaponStats(WeaponStats):
 class MeleeWeaponStats(BaseModel):
     melee_weapon_name: str = Field(..., description="Name of the melee weapon")
     kill_death_ratio: float = Field(
-        ge=0, lte=KD_RATIO_MAX, description="Ratio of kills to deaths with this melee weapon"
+        ge=0,
+        lte=KD_RATIO_MAX,
+        description="Ratio of kills to deaths with this melee weapon",
     )
     damage_dealt: int = Field(
         ge=0, lte=DMG_MAX, description="Total damage dealt with this melee weapon"
@@ -63,15 +68,22 @@ class HardpointScoreboard(Scoreboard):
     objective_captures: int = Field(ge=0, description="Number of objective captures")
     objective_kills: int = Field(ge=0, description="Number of objective kills")
     captures: int = Field(ge=0, description="Number of captures")
-    friendly_score: int = Field(ge=0, lte=HARDPOINT_SCORE_MAX, description="Friendly score")
+    friendly_score: int = Field(
+        ge=0, lte=HARDPOINT_SCORE_MAX, description="Friendly score"
+    )
     enemy_score: int = Field(ge=0, lte=HARDPOINT_SCORE_MAX, description="Enemy score")
 
 
 class OverloadScoreboard(Scoreboard):
     overloads: int = Field(ge=0, description="Number of overloads achieved")
-    overload_devices_carrier_killed: int = Field(ge=0, description="Number of overload carriers killed")
-    friendly_score: int = Field(ge=0, lte=OVERLOAD_SCORE_MAX, description="Friendly score")
+    overload_devices_carrier_killed: int = Field(
+        ge=0, description="Number of overload carriers killed"
+    )
+    friendly_score: int = Field(
+        ge=0, lte=OVERLOAD_SCORE_MAX, description="Friendly score"
+    )
     enemy_score: int = Field(ge=0, lte=OVERLOAD_SCORE_MAX, description="Enemy score")
+
 
 class SearchAndDestroyScoreboard(Scoreboard):
     plants: int = Field(ge=0, description="Number of bomb plants")
@@ -81,10 +93,17 @@ class SearchAndDestroyScoreboard(Scoreboard):
     friendly_score: int = Field(ge=0, lte=SND_SCORE_MAX, description="Friendly score")
     enemy_score: int = Field(ge=0, lte=SND_SCORE_MAX, description="Enemy score")
 
+
 class GameStats(BaseModel):
-    primary_weapon_stats: PrimaryWeaponStats = Field(..., description="Primary weapon statistics as shown in Weapon Stats section")
-    secondary_weapon_stats: SecondaryWeaponStats = Field(..., description="Secondary weapon statistics as shown in Weapon Stats section")
-    melee_weapon_stats: MeleeWeaponStats = Field(..., description="Melee weapon statistics as shown in Weapon Stats section")
+    primary_weapon_stats: PrimaryWeaponStats = Field(
+        ..., description="Primary weapon statistics as shown in Weapon Stats section"
+    )
+    secondary_weapon_stats: SecondaryWeaponStats = Field(
+        ..., description="Secondary weapon statistics as shown in Weapon Stats section"
+    )
+    melee_weapon_stats: MeleeWeaponStats = Field(
+        ..., description="Melee weapon statistics as shown in Weapon Stats section"
+    )
     map: Maps = Field(..., description="Map where the game was played")
     team: Teams = Field(..., description="Team of the player")
 
@@ -92,17 +111,25 @@ class GameStats(BaseModel):
 # Root-level discriminated union for GameStats
 class HardpointGameStats(GameStats):
     game_mode: Literal[GameModes.HARDPOINT] = Field(..., description="Game mode played")
-    scoreboard: HardpointScoreboard = Field(..., description="Scoreboard statistics for Hardpoint mode")
+    scoreboard: HardpointScoreboard = Field(
+        ..., description="Scoreboard statistics for Hardpoint mode"
+    )
 
 
 class OverloadGameStats(GameStats):
     game_mode: Literal[GameModes.OVERLOAD] = Field(..., description="Game mode played")
-    scoreboard: OverloadScoreboard = Field(..., description="Scoreboard statistics for Overload mode")
+    scoreboard: OverloadScoreboard = Field(
+        ..., description="Scoreboard statistics for Overload mode"
+    )
 
 
 class SearchAndDestroyGameStats(GameStats):
-    game_mode: Literal[GameModes.SEARCH_AND_DESTROY] = Field(..., description="Game mode played")
-    scoreboard: SearchAndDestroyScoreboard = Field(..., description="Scoreboard statistics for Search and Destroy mode")
+    game_mode: Literal[GameModes.SEARCH_AND_DESTROY] = Field(
+        ..., description="Game mode played"
+    )
+    scoreboard: SearchAndDestroyScoreboard = Field(
+        ..., description="Scoreboard statistics for Search and Destroy mode"
+    )
 
 
 GameStats = Annotated[
