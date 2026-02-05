@@ -17,19 +17,19 @@ HARDPOINT_SCORE_MAX = 250
 class WeaponStats(BaseModel):
     """Base model for weapon statistics."""
 
-    eliminations: int = Field(ge=0, lte=ELIM_MAX, description="Number of eliminations")
+    eliminations: int = Field(ge=0, le=ELIM_MAX, description="Number of eliminations")
     elimination_death_ratio: float = Field(
-        ge=0, lte=ELIM_RATIO_MAX, description="Elimination to death ratio"
+        ge=0, le=ELIM_RATIO_MAX, description="Elimination to death ratio"
     )
-    damage_dealt: int = Field(ge=0, lte=DMG_MAX, description="Total damage dealt")
+    damage_dealt: int = Field(ge=0, le=DMG_MAX, description="Total damage dealt")
     headshot_kills: int = Field(
-        ge=0, lte=ELIM_MAX, description="Number of headshot kills"
+        ge=0, le=ELIM_MAX, description="Number of headshot kills"
     )
     headshot_percentage: float = Field(
-        ge=0, lte=PERCENTAGE_MAX, description="Percentage of shots that were headshots"
+        ge=0, le=PERCENTAGE_MAX, description="Percentage of shots that were headshots"
     )
     accuracy_percentage: float = Field(
-        ge=0, lte=PERCENTAGE_MAX, description="Percentage of shots that hit the target"
+        ge=0, le=PERCENTAGE_MAX, description="Percentage of shots that hit the target"
     )
 
 
@@ -45,20 +45,20 @@ class MeleeWeaponStats(BaseModel):
     melee_weapon_name: str = Field(..., description="Name of the melee weapon")
     kill_death_ratio: float = Field(
         ge=0,
-        lte=KD_RATIO_MAX,
+        le=KD_RATIO_MAX,
         description="Ratio of kills to deaths with this melee weapon",
     )
     damage_dealt: int = Field(
-        ge=0, lte=DMG_MAX, description="Total damage dealt with this melee weapon"
+        ge=0, le=DMG_MAX, description="Total damage dealt with this melee weapon"
     )
 
 
 class Scoreboard(BaseModel):
     player: str = Field(..., description="Player's in-game name")
-    eliminations: int = Field(ge=0, lte=ELIM_MAX, description="Number of eliminations")
-    deaths: int = Field(ge=0, lte=DEATH_MAX, description="Number of deaths")
+    eliminations: int = Field(ge=0, le=ELIM_MAX, description="Number of eliminations")
+    deaths: int = Field(ge=0, le=DEATH_MAX, description="Number of deaths")
     elimination_death_ratio: float = Field(
-        ge=0, lte=ELIM_RATIO_MAX, description="Elimination to death ratio"
+        ge=0, le=ELIM_RATIO_MAX, description="Elimination to death ratio"
     )
     score: int = Field(ge=0, description="Player's score")
 
@@ -69,9 +69,9 @@ class HardpointScoreboard(Scoreboard):
     objective_kills: int = Field(ge=0, description="Number of objective kills")
     captures: int = Field(ge=0, description="Number of captures")
     friendly_score: int = Field(
-        ge=0, lte=HARDPOINT_SCORE_MAX, description="Friendly score"
+        ge=0, le=HARDPOINT_SCORE_MAX, description="Friendly score"
     )
-    enemy_score: int = Field(ge=0, lte=HARDPOINT_SCORE_MAX, description="Enemy score")
+    enemy_score: int = Field(ge=0, le=HARDPOINT_SCORE_MAX, description="Enemy score")
 
 
 class OverloadScoreboard(Scoreboard):
@@ -80,9 +80,9 @@ class OverloadScoreboard(Scoreboard):
         ge=0, description="Number of overload carriers killed"
     )
     friendly_score: int = Field(
-        ge=0, lte=OVERLOAD_SCORE_MAX, description="Friendly score"
+        ge=0, le=OVERLOAD_SCORE_MAX, description="Friendly score"
     )
-    enemy_score: int = Field(ge=0, lte=OVERLOAD_SCORE_MAX, description="Enemy score")
+    enemy_score: int = Field(ge=0, le=OVERLOAD_SCORE_MAX, description="Enemy score")
 
 
 class SearchAndDestroyScoreboard(Scoreboard):
@@ -90,8 +90,8 @@ class SearchAndDestroyScoreboard(Scoreboard):
     defuses: int = Field(ge=0, description="Number of bomb defuses")
     objective_kills: int = Field(ge=0, description="Number of objective kills")
     objective_score: int = Field(ge=0, description="Objective score")
-    friendly_score: int = Field(ge=0, lte=SND_SCORE_MAX, description="Friendly score")
-    enemy_score: int = Field(ge=0, lte=SND_SCORE_MAX, description="Enemy score")
+    friendly_score: int = Field(ge=0, le=SND_SCORE_MAX, description="Friendly score")
+    enemy_score: int = Field(ge=0, le=SND_SCORE_MAX, description="Enemy score")
 
 
 class GameStats(BaseModel):
