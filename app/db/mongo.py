@@ -1,5 +1,5 @@
-from pymongo import MongoClient
+from pymongo import AsyncMongoClient
 from app.core.settings import settings
 
-client = MongoClient(settings.MONGODB_URI)
-db = client[settings.MONGODB_DB]
+client = AsyncMongoClient(settings.MONGODB_URI)
+db = client.get_database(settings.MONGODB_DB)

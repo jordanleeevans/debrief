@@ -21,8 +21,8 @@ async def handle_match_saved(event: GameStatsAnalyzed) -> None:
         }
 
         # Insert into MongoDB
-        matches_collection = db["matches"]
-        result = matches_collection.insert_one(match_document)
+        matches_collection = db.get_collection("matches")
+        result = await matches_collection.insert_one(match_document)
 
         match_id = str(result.inserted_id)
         logger.info(f"Successfully saved match with ID: {match_id}")
