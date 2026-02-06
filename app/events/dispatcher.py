@@ -39,6 +39,30 @@ class EventDispatcher:
                     f"Error in handler {handler.__name__}: {str(e)}", exc_info=True
                 )
 
+    def clear_handlers(self) -> None:
+        """Clear all registered handlers (useful for testing)"""
+        self.handlers.clear()
+        logger.debug("Cleared all event handlers")
 
-# Global dispatcher instance
-dispatcher = EventDispatcher()
+    @property
+    def registered_events(self) -> list[type]:
+        """Get a list of registered event types"""
+        return list(self.handlers.keys())
+
+    @property
+    def registered_handlers(self) -> dict[type, list[Callable]]:
+        """Get the dictionary of registered handlers"""
+        return self.handlers
+
+
+class FakeEventDispatcher(EventDispatcher):
+    """A fake dispatcher for testing purposes"""
+
+    def __init__(self):
+        super().__init__()
+        self.emitted_events: list[Any] = []
+
+    async def emit(self, event: Any) -> None:
+        """Override emit to store emitted events for assertions in tests"""
+        self.emitted_events.append(event)
+        await super().emit(event)

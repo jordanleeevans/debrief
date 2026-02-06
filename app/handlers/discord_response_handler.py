@@ -1,5 +1,5 @@
 import logging
-from app.events import dispatcher, MatchSaved
+from app.events import MatchSaved, EventDispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ async def handle_match_saved_discord_response(event: MatchSaved) -> None:
         logger.error(f"Error sending Discord response: {str(e)}", exc_info=True)
 
 
-def register_discord_response_handler() -> None:
+def register_discord_response_handler(dispatcher: EventDispatcher) -> None:
     """Register Discord response handler"""
     dispatcher.subscribe(MatchSaved, handle_match_saved_discord_response)
     logger.info("Registered Discord response handler")

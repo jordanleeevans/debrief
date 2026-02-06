@@ -1,12 +1,16 @@
 import logging
-from app.events import dispatcher, AnalyzeImagesRequested, GameStatsAnalyzed
+from app.events import AnalyzeImagesRequested, GameStatsAnalyzed, EventDispatcher
 from app.services.gemini import GeminiClient
 from app.core.settings import settings
 
 logger = logging.getLogger(__name__)
 
 
-async def handle_analyze_images(event: AnalyzeImagesRequested, client: GeminiClient = GeminiClient) -> None:
+async def handle_analyze_images(
+    event: AnalyzeImagesRequested,
+    dispatcher: EventDispatcher,
+    client: GeminiClient = GeminiClient,
+) -> None:
     """Handle image analysis request from Discord"""
     logger.info(
         f"Analyzing images for user {event.discord_user_id}, message {event.discord_message_id}"
@@ -33,7 +37,9 @@ async def handle_analyze_images(event: AnalyzeImagesRequested, client: GeminiCli
         raise
 
 
-def register_gemini_handlers() -> None:
+def register_gemini_handlers(dispatcher: EventDispatcher) -> None:
     """Register Gemini analysis handler"""
-    dispatcher.subscribe(AnalyzeImagesRequested, handle_analyze_images)
+    dispatcher.subscribe(
+        AnalyzeImagesRequested, lambda event: handle_analyze_images(event, dispatcher)
+    )
     logger.info("Registered Gemini analysis handler")

@@ -3,11 +3,12 @@ from app.events.events import (
     GameStatsAnalyzed,
     MatchSaved,
 )
-from app.events.dispatcher import dispatcher
+from app.events.dispatcher import EventDispatcher, FakeEventDispatcher
 
 __all__ = [
     "AnalyzeImagesRequested",
     "GameStatsAnalyzed",
     "MatchSaved",
-    "dispatcher",
+    "EventDispatcher",
+    "FakeEventDispatcher",
 ]

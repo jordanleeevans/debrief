@@ -5,7 +5,8 @@ import logging
 from fastapi import FastAPI
 from http import HTTPStatus
 from app.core.settings import settings
-from app.services.discord_client import bot
+from app.events import EventDispatcher
+from app.services.discord_client import bot, set_dispatcher
 from app.models.schemas import GameStatsResponse
 from app.handlers import (
     register_gemini_handlers,
@@ -20,16 +21,19 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+# Create dispatcher instance
+dispatcher = EventDispatcher()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Initialising start up configurations.")
 
-    # Register event handlers
+    # Set dispatcher in bot and register event handlers
     logger.info("Registering event handlers...")
-    register_gemini_handlers()
-    register_mongodb_handlers()
-    register_discord_response_handler()
+    register_gemini_handlers(dispatcher)
+    register_mongodb_handlers(dispatcher)
+    register_discord_response_handler(dispatcher)
     logger.info("Event handlers registered successfully.")
 
     try:

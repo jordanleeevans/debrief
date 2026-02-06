@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import logging
 
-from app.events import dispatcher, AnalyzeImagesRequested
+from app.events import AnalyzeImagesRequested, EventDispatcher
 from app.handlers import store_discord_context
 
 logger = logging.getLogger(__name__)
@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+bot.dispatcher = EventDispatcher()  # Use our custom event dispatcher
 
 
 @bot.event
@@ -68,7 +70,7 @@ async def stats(ctx):
             discord_user_id=ctx.author.id,
             discord_message_id=ctx.message.id,
         )
-        await dispatcher.emit(event)
+        await ctx.bot.dispatcher.emit(event)
 
         # Send confirmation that processing started
         await ctx.send("📊 Processing your stats... This may take a moment.")

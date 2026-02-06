@@ -62,6 +62,12 @@ class GeminiClient:
 
 class FakeGeminiClient(GeminiClient):
 
+    def __call__(self, api_key: str = None):
+        return self
+
+    def __init__(self, api_key: str = None):
+        pass
+
     async def generate_game_stats(
         self, image_one: bytes, image_two: bytes | None = None
     ) -> GameStatsResponse:

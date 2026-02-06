@@ -1,11 +1,14 @@
 import logging
-from app.events import dispatcher, GameStatsAnalyzed, MatchSaved
+from app.events import GameStatsAnalyzed, MatchSaved, EventDispatcher
 from app.db.mongo import db
+from pymongo.asynchronous.database import AsyncDatabase
 
 logger = logging.getLogger(__name__)
 
 
-async def handle_match_saved(event: GameStatsAnalyzed) -> None:
+async def handle_match_saved(
+    event: GameStatsAnalyzed, dispatcher: EventDispatcher, db: AsyncDatabase = db
+) -> None:
     """Handle saving analyzed game stats to MongoDB"""
     logger.info(
         f"Saving match data for user {event.discord_user_id}, message {event.discord_message_id}"
@@ -41,7 +44,9 @@ async def handle_match_saved(event: GameStatsAnalyzed) -> None:
         raise
 
 
-def register_mongodb_handlers() -> None:
+def register_mongodb_handlers(dispatcher: EventDispatcher) -> None:
     """Register MongoDB persistence handler"""
-    dispatcher.subscribe(GameStatsAnalyzed, handle_match_saved)
+    dispatcher.subscribe(
+        GameStatsAnalyzed, lambda event: handle_match_saved(event, dispatcher)
+    )
     logger.info("Registered MongoDB persistence handler")
