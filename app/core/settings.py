@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     MONGODB_USER: str = "admin"
     MONGODB_PASSWORD: str = "password"
     DISCORD_BOT_TOKEN: str = "secret_token"
+    GEMINI_API_KEY: str = "secret_api_key"
 
     model_config = ConfigDict(env_file=".env")
 

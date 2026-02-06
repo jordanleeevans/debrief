@@ -6,7 +6,12 @@ from fastapi import FastAPI
 from http import HTTPStatus
 from app.core.settings import settings
 from app.services.discord_client import bot
-from app.models.schemas import GameStats
+from app.models.schemas import GameStatsResponse
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 logger = logging.getLogger(__name__)
 
@@ -14,10 +19,23 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Initialising start up configurations.")
-    asyncio.create_task(bot.start(settings.DISCORD_BOT_TOKEN))
+    try:
+        logger.info("Starting Discord bot...")
+        bot_task = asyncio.create_task(bot.start(settings.DISCORD_BOT_TOKEN))
+        # Give the bot a moment to start connecting
+        await asyncio.sleep(1)
+        logger.info("Discord bot task created successfully.")
+    except Exception as e:
+        logger.error(f"Error starting Discord bot: {str(e)}", exc_info=True)
 
     yield
-    await bot.close()
+
+    try:
+        logger.info("Closing Discord bot...")
+        await bot.close()
+        logger.info("Discord bot closed successfully.")
+    except Exception as e:
+        logger.error(f"Error closing Discord bot: {str(e)}", exc_info=True)
 
 
 app = FastAPI(title="Debfrief API", version="1.0.0", lifespan=lifespan)
@@ -29,5 +47,5 @@ def health_check():
 
 
 @app.post("/schemas/test")
-def test_game_stats(game_stats: GameStats):
+def test_game_stats(game_stats: GameStatsResponse):
     return game_stats

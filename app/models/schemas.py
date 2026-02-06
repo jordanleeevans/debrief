@@ -1,6 +1,11 @@
-from pydantic import BaseModel, Field
-from typing import Union, Annotated, Literal
-from app.models.enums import Maps, GameModes, Teams
+from pydantic import BaseModel, Field, model_validator
+from typing import Optional, Union, Annotated, Literal
+from app.models.types import PrimaryWeaponType, SecondaryWeaponType, Knife
+from app.models.enums import (
+    Maps,
+    GameModes,
+    Teams,
+)
 
 ELIM_MAX = 200
 DEATH_MAX = 200
@@ -34,15 +39,19 @@ class WeaponStats(BaseModel):
 
 
 class PrimaryWeaponStats(WeaponStats):
-    primary_weapon_name: str = Field(..., description="Name of the primary weapon")
+    primary_weapon_name: PrimaryWeaponType = Field(
+        ..., description="Name of the primary weapon"
+    )
 
 
 class SecondaryWeaponStats(WeaponStats):
-    secondary_weapon_name: str = Field(..., description="Name of the secondary weapon")
+    secondary_weapon_name: SecondaryWeaponType = Field(
+        ..., description="Name of the secondary weapon"
+    )
 
 
 class MeleeWeaponStats(BaseModel):
-    melee_weapon_name: str = Field(..., description="Name of the melee weapon")
+    melee_weapon_name: Knife = Field(..., description="Name of the melee weapon")
     kill_death_ratio: float = Field(
         ge=0,
         le=KD_RATIO_MAX,
@@ -108,7 +117,6 @@ class GameStats(BaseModel):
     team: Teams = Field(..., description="Team of the player")
 
 
-# Root-level discriminated union for GameStats
 class HardpointGameStats(GameStats):
     game_mode: Literal[GameModes.HARDPOINT] = Field(..., description="Game mode played")
     scoreboard: HardpointScoreboard = Field(
@@ -132,11 +140,48 @@ class SearchAndDestroyGameStats(GameStats):
     )
 
 
-GameStats = Annotated[
-    Union[
-        HardpointGameStats,
-        OverloadGameStats,
-        SearchAndDestroyGameStats,
-    ],
-    Field(discriminator="game_mode"),
-]
+class GameStatsResponse(BaseModel):
+    """Response model that accepts any game mode variant for API responses."""
+
+    primary_weapon_stats: Optional[PrimaryWeaponStats] = Field(
+        None, description="Primary weapon statistics as shown in Weapon Stats section"
+    )
+    secondary_weapon_stats: Optional[SecondaryWeaponStats] = Field(
+        None, description="Secondary weapon statistics as shown in Weapon Stats section"
+    )
+    melee_weapon_stats: Optional[MeleeWeaponStats] = Field(
+        None, description="Melee weapon statistics as shown in Weapon Stats section"
+    )
+    map: Maps = Field(..., description="Map where the game was played")
+    team: Teams = Field(..., description="Team of the player")
+    game_mode: GameModes = Field(..., description="Game mode played")
+    scoreboard: Union[
+        HardpointScoreboard, OverloadScoreboard, SearchAndDestroyScoreboard
+    ] = Field(..., description="Scoreboard statistics for the game mode")
+
+    # ensure that the scoreboard type matches the game mode
+    @model_validator(mode="after")
+    def validate_scoreboard(self):
+        game_mode = self.game_mode
+        scoreboard = self.scoreboard
+
+        if game_mode == GameModes.HARDPOINT and not isinstance(
+            scoreboard, HardpointScoreboard
+        ):
+            raise ValueError(
+                "Scoreboard must be of type HardpointScoreboard for Hardpoint mode"
+            )
+        elif game_mode == GameModes.OVERLOAD and not isinstance(
+            scoreboard, OverloadScoreboard
+        ):
+            raise ValueError(
+                "Scoreboard must be of type OverloadScoreboard for Overload mode"
+            )
+        elif game_mode == GameModes.SEARCH_AND_DESTROY and not isinstance(
+            scoreboard, SearchAndDestroyScoreboard
+        ):
+            raise ValueError(
+                "Scoreboard must be of type SearchAndDestroyScoreboard for Search and Destroy mode"
+            )
+
+        return self
