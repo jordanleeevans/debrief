@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands
 import logging
 
-from app.core.settings import settings
-from app.services.gemini import GeminiClient
+from app.events import dispatcher, AnalyzeImagesRequested
+from app.handlers import store_discord_context
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,12 @@ async def stats(ctx):
     """Analyzes game stats from two images using Gemini AI."""
     logger.info(f"stats command triggered by {ctx.author}")
 
+    if not ctx.message.attachments:
+        error_msg = "Please attach at least one image of your game stats."
+        logger.warning(error_msg)
+        await ctx.send(error_msg)
+        return
+
     # reject any images of size > 10MB
     if any(attachment.size > 10_000_000 for attachment in ctx.message.attachments):
         error_msg = "Please attach images smaller than 10MB."
@@ -51,22 +57,22 @@ async def stats(ctx):
         if len(ctx.message.attachments) == 2:
             image_two = await ctx.message.attachments[1].read()
 
-        # Initialize Gemini client (using FakeGeminiClient for testing due to API quota limits)
-        logger.info("Initializing Gemini client...")
-        gemini_client = GeminiClient(api_key=settings.GEMINI_API_KEY)
+        # Store context for response later
+        store_discord_context(ctx.message.id, ctx)
 
-        # Send images to Gemini and get response
-        logger.info("Sending images to Gemini for analysis...")
-        game_stats = await gemini_client.generate_game_stats(image_one, image_two)
-
-        # Log the response
-        logger.info(f"Game stats received: {game_stats.model_dump()}")
-
-        # Send response back to Discord
-        await ctx.send(
-            f"✅ Analysis complete!\n```json\n{game_stats.model_dump_json(indent=2)}\n```"
+        # Emit event for analysis (decoupled from Discord)
+        logger.info("Emitting AnalyzeImagesRequested event...")
+        event = AnalyzeImagesRequested(
+            image_one=image_one,
+            image_two=image_two,
+            discord_user_id=ctx.author.id,
+            discord_message_id=ctx.message.id,
         )
+        await dispatcher.emit(event)
+
+        # Send confirmation that processing started
+        await ctx.send("📊 Processing your stats... This may take a moment.")
 
     except Exception as e:
-        logger.error(f"Error analyzing stats: {str(e)}", exc_info=True)
-        await ctx.send(f"❌ Error analyzing stats: {str(e)}")
+        logger.error(f"Error in stats command: {str(e)}", exc_info=True)
+        await ctx.send(f"❌ Error processing request: {str(e)}")
