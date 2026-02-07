@@ -1,7 +1,7 @@
 import pytest
-from app.events import EventDispatcher, AnalyzeImagesRequested, FakeEventDispatcher
+from app.events import EventDispatcher, AnalyzeImagesRequested
 from app.events.events import GameStatsAnalyzed
-from app.services.gemini import FakeGeminiClient
+from app.tests.mocks import FakeGeminiClient, FakeEventDispatcher
 
 
 def test_register_gemini_handlers():

@@ -1,9 +1,12 @@
 import pytest
-from app.events import EventDispatcher, AnalyzeImagesRequested, FakeEventDispatcher
+from app.events import EventDispatcher, AnalyzeImagesRequested
 from app.events.events import GameStatsAnalyzed, MatchSaved
-from app.repositories import FakeMatchRepository
-from app.services.gemini import FakeGeminiClient
-from app.db.mongo import FakeAsyncDatabase
+from app.tests.mocks import (
+    FakeMatchRepository,
+    FakeGeminiClient,
+    FakeEventDispatcher,
+    FakeAsyncDatabase,
+)
 
 
 def test_register_mongodb_handlers():
@@ -33,7 +36,6 @@ async def test_handle_game_stats_analyzed_emits_match_saved():
     )
     fake_match_repo = FakeMatchRepository()
 
-
     await handle_match_saved(event, dispatcher, fake_match_repo)
 
     assert len(dispatcher.emitted_events) == 1
@@ -41,6 +43,7 @@ async def test_handle_game_stats_analyzed_emits_match_saved():
     emitted_event: MatchSaved = dispatcher.emitted_events[0]
     assert emitted_event.discord_user_id == event.discord_user_id
     assert emitted_event.discord_message_id == event.discord_message_id
+
 
 @pytest.mark.asyncio
 async def test_handle_game_stats_analyzed_saves_to_repository():
