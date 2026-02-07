@@ -5,7 +5,7 @@ from app.services.gemini import FakeGeminiClient
 
 def test_get_channel_from_cache_returns_none_for_missing_channel():
     """Test that get_channel_from_cache returns None when channel is not in cache"""
-    from app.handlers.discord_response_handler import get_channel_from_cache
+    from app.handlers.discord import get_channel_from_cache
 
     bot = FakeBot()
     channel = get_channel_from_cache(bot, 123)
@@ -13,7 +13,7 @@ def test_get_channel_from_cache_returns_none_for_missing_channel():
 
 def test_get_channel_from_cache_returns_channel():
     """Test that get_channel_from_cache returns the channel when it is in cache"""
-    from app.handlers.discord_response_handler import get_channel_from_cache
+    from app.handlers.discord import get_channel_from_cache
 
     bot = FakeBot()
     fake_channel = object()  # Use a simple object as a fake channel
@@ -25,7 +25,7 @@ def test_get_channel_from_cache_returns_channel():
 @pytest.mark.asyncio
 async def test_fetch_channel_from_api_returns_channel(monkeypatch):
     """Test that fetch_channel_from_api returns a channel and caches it"""
-    from app.handlers.discord_response_handler import fetch_channel_from_api
+    from app.handlers.discord import fetch_channel_from_api
 
     bot = FakeBot()
 
@@ -37,7 +37,7 @@ async def test_fetch_channel_from_api_returns_channel(monkeypatch):
 @pytest.mark.asyncio
 async def test_fetch_channel_from_api_handles_exception(monkeypatch):
     """Test that fetch_channel_from_api returns None and logs an error when an exception occurs"""
-    from app.handlers.discord_response_handler import fetch_channel_from_api
+    from app.handlers.discord import fetch_channel_from_api
 
     bot = FakeBot()
 
@@ -53,7 +53,7 @@ async def test_fetch_channel_from_api_handles_exception(monkeypatch):
 @pytest.mark.asyncio
 async def test_handle_discord_response_sends_message():
     """Test that handle_discord_response sends a message to the correct channel"""
-    from app.handlers.discord_response_handler import handle_discord_response
+    from app.handlers.discord import handle_discord_response
     from app.events import MatchSaved
     class FakeChannel:
         def __init__(self):
@@ -82,7 +82,7 @@ async def test_handle_discord_response_sends_message():
 @pytest.mark.asyncio
 async def test_handle_discord_response_channel_not_found():
     """Test that handle_discord_response logs an error when the channel cannot be found"""
-    from app.handlers.discord_response_handler import handle_discord_response
+    from app.handlers.discord import handle_discord_response
     from app.events import MatchSaved
 
     bot = FakeBot()
@@ -101,7 +101,7 @@ async def test_handle_discord_response_channel_not_found():
 
 def test_register_discord_response_handler():
     """Test that register_discord_response_handler subscribes the handler to the dispatcher"""
-    from app.handlers.discord_response_handler import register_discord_response_handler
+    from app.handlers.discord import register_discord_response_handler
     from app.events import EventDispatcher, MatchSaved
 
     dispatcher = EventDispatcher()

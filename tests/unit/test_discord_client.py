@@ -5,7 +5,7 @@ import pytest
 # Skip the tests if the optional discord dependency isn't available in the environment
 pytest.importorskip("discord")
 
-import app.services.discord_client as dc
+import app.services.discord as dc
 
 
 def test_on_ready_is_coroutine():

@@ -8,7 +8,7 @@ def test_register_gemini_handlers():
     """Test that the Gemini handlers are registered correctly"""
     dispatcher = EventDispatcher()
 
-    from app.handlers.gemini_handler import register_gemini_handlers
+    from app.handlers.gemini import register_gemini_handlers
 
     register_gemini_handlers(dispatcher)
 
@@ -19,7 +19,7 @@ def test_register_gemini_handlers():
 @pytest.mark.asyncio
 async def test_handle_analyze_images_emits_game_stats_analyzed():
     """Test that the analyze images handler emits GameStatsAnalyzed event"""
-    from app.handlers.gemini_handler import handle_analyze_images
+    from app.handlers.gemini import handle_analyze_images
 
     dispatcher = FakeEventDispatcher()
     client = FakeGeminiClient()
