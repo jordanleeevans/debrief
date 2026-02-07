@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from http import HTTPStatus
 from app.core.settings import settings
 from app.events import EventDispatcher
-from app.services.discord_client import bot, set_dispatcher
+from app.services.discord_client import bot
 from app.models.schemas import GameStatsResponse
 from app.handlers import (
     register_gemini_handlers,
@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
     logger.info("Registering event handlers...")
     register_gemini_handlers(dispatcher)
     register_mongodb_handlers(dispatcher)
-    register_discord_response_handler(dispatcher)
+    register_discord_response_handler(dispatcher, bot)
     logger.info("Event handlers registered successfully.")
 
     try:

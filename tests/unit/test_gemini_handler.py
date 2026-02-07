@@ -28,6 +28,7 @@ async def test_handle_analyze_images_emits_game_stats_analyzed():
         image_two="image2.png",
         discord_user_id=123,
         discord_message_id=456,
+        discord_channel_id=789,
     )
 
     game_stats = await client.generate_game_stats(event.image_one, event.image_two)

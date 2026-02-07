@@ -29,6 +29,7 @@ async def handle_analyze_images(
             game_stats=game_stats,
             discord_user_id=event.discord_user_id,
             discord_message_id=event.discord_message_id,
+            discord_channel_id=event.discord_channel_id,
         )
         await dispatcher.emit(analyzed_event)
 

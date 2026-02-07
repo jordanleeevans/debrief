@@ -1,5 +1,7 @@
 import logging
 from app.events import GameStatsAnalyzed, MatchSaved, EventDispatcher
+from app.repositories import MatchRepository
+from app.models.schemas import MatchDocument
 from app.db.mongo import db
 from pymongo.asynchronous.database import AsyncDatabase
 
@@ -7,7 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 async def handle_match_saved(
-    event: GameStatsAnalyzed, dispatcher: EventDispatcher, db: AsyncDatabase = db
+    event: GameStatsAnalyzed,
+    dispatcher: EventDispatcher,
+    matches_repository: MatchRepository = MatchRepository(db),
 ) -> None:
     """Handle saving analyzed game stats to MongoDB"""
     logger.info(
@@ -15,19 +19,16 @@ async def handle_match_saved(
     )
 
     try:
-        # Prepare match document
-        match_document = {
-            "discord_user_id": event.discord_user_id,
-            "discord_message_id": event.discord_message_id,
-            "game_stats": event.game_stats.model_dump(),
-            "created_at": event.timestamp,
-        }
+        match_document = MatchDocument(
+            discord_user_id=event.discord_user_id,
+            discord_message_id=event.discord_message_id,
+            discord_channel_id=event.discord_channel_id,
+            game_stats=event.game_stats,
+            created_at=event.timestamp,
+        )
 
-        # Insert into MongoDB
-        matches_collection = db.get_collection("matches")
-        result = await matches_collection.insert_one(match_document)
+        match_id = await matches_repository.insert_one(match_document)
 
-        match_id = str(result.inserted_id)
         logger.info(f"Successfully saved match with ID: {match_id}")
 
         # Emit MatchSaved event for any other handlers
@@ -35,6 +36,7 @@ async def handle_match_saved(
             match_id=match_id,
             discord_user_id=event.discord_user_id,
             discord_message_id=event.discord_message_id,
+            discord_channel_id=event.discord_channel_id,
             game_stats=event.game_stats,
         )
         await dispatcher.emit(saved_event)

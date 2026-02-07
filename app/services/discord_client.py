@@ -3,7 +3,6 @@ from discord.ext import commands
 import logging
 
 from app.events import AnalyzeImagesRequested, EventDispatcher
-from app.handlers import store_discord_context
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +58,8 @@ async def stats(ctx):
         if len(ctx.message.attachments) == 2:
             image_two = await ctx.message.attachments[1].read()
 
-        # Store context for response later
-        store_discord_context(ctx.message.id, ctx)
+        # Include primitive identifiers (channel + message) in the event
+        # so downstream handlers can reply without holding Discord context.
 
         # Emit event for analysis (decoupled from Discord)
         logger.info("Emitting AnalyzeImagesRequested event...")
@@ -69,6 +68,7 @@ async def stats(ctx):
             image_two=image_two,
             discord_user_id=ctx.author.id,
             discord_message_id=ctx.message.id,
+            discord_channel_id=ctx.channel.id,
         )
         await ctx.bot.dispatcher.emit(event)
 

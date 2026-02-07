@@ -19,6 +19,7 @@ class AnalyzeImagesRequested(Event):
     image_two: bytes | None
     discord_user_id: int
     discord_message_id: int
+    discord_channel_id: int
     timestamp: datetime = None
 
 
@@ -29,6 +30,7 @@ class GameStatsAnalyzed(Event):
     game_stats: GameStatsResponse
     discord_user_id: int
     discord_message_id: int
+    discord_channel_id: int
     timestamp: datetime = None
 
 
@@ -39,5 +41,6 @@ class MatchSaved(Event):
     match_id: str
     discord_user_id: int
     discord_message_id: int
+    discord_channel_id: int
     game_stats: GameStatsResponse
     timestamp: datetime = None

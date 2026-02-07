@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field, model_validator
+from datetime import datetime
 from typing import Optional, Union, Annotated, Literal
 from app.models.types import PrimaryWeaponType, SecondaryWeaponType, Knife
 from app.models.enums import (
@@ -185,3 +186,19 @@ class GameStatsResponse(BaseModel):
             )
 
         return self
+
+
+class MatchDocument(BaseModel):
+    discord_user_id: int = Field(
+        ..., description="Discord user ID associated with the match"
+    )
+    discord_message_id: int = Field(
+        ..., description="Discord message ID associated with the match"
+    )
+    discord_channel_id: int = Field(
+        ..., description="Discord channel ID associated with the match"
+    )
+    game_stats: GameStatsResponse = Field(..., description="Game stats response object")
+    created_at: datetime = Field(
+        ..., description="Timestamp when the match was saved to MongoDB"
+    )

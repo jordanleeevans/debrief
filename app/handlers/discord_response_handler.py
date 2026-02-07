@@ -3,40 +3,57 @@ from app.events import MatchSaved, EventDispatcher
 
 logger = logging.getLogger(__name__)
 
-# Store Discord context for sending messages back
-_discord_contexts: dict[int, object] = {}
+def get_channel_from_cache(bot, channel_id : int):
+    """Helper function to get channel from cache"""
+    channel = bot.get_channel(channel_id)
+    if channel is None:
+        logger.debug(f"Channel {channel_id} not found in cache")
+    else:
+        logger.debug(f"Channel {channel_id} found in cache")
+    return channel
 
+async def fetch_channel_from_api(bot, channel_id : int):
+    """Helper function to fetch channel from Discord API"""
+    try:
+        channel = await bot.fetch_channel(channel_id)
+        logger.debug(f"Channel {channel_id} fetched from API successfully")
+        return channel
+    except Exception as e:
+        logger.error(f"Failed to fetch channel {channel_id} from API: {e}", exc_info=True)
+        return None
 
-def store_discord_context(message_id: int, ctx: object) -> None:
-    """Store Discord context for later message sending"""
-    _discord_contexts[message_id] = ctx
+async def handle_discord_response(bot, event: MatchSaved):
+    """Helper function to send message to Discord channel"""
+    channel = get_channel_from_cache(bot, event.discord_channel_id)
+    if channel is None:
+        logger.info(f"Channel {event.discord_channel_id} not in cache, fetching from API...")
+        channel = await fetch_channel_from_api(bot, event.discord_channel_id)
+    
+    if channel is None:
+        logger.error(f"Unable to send message: Channel {event.discord_channel_id} could not be found after API fetch")
+        return
 
+    result_message = (
 
-async def handle_match_saved_discord_response(event: MatchSaved) -> None:
-    """Handle sending analysis results back to Discord after MongoDB save"""
-    logger.info(f"Sending results to Discord for message {event.discord_user_id}")
+        f"✅ Analysis complete! Match saved with ID: `{event.match_id}`\n"
+        f"```json\n{event.game_stats.model_dump_json(indent=2)}\n```"
+    )
 
     try:
-        ctx = _discord_contexts.get(event.discord_message_id)
-        if ctx is None:
-            logger.warning(f"No Discord context found for match {event.match_id}")
-            return
-
-        # Send results back to Discord
-        result_message = (
-            f"✅ Analysis complete! Match saved with ID: `{event.match_id}`\n"
-            f"```json\n{event.game_stats.model_dump_json(indent=2)}\n```"
-        )
-        await ctx.send(result_message)
-
-        # Clean up context
-        del _discord_contexts[event.discord_message_id]
-
+        await channel.send(content=result_message)
+        logger.info(f"Sent message to channel {event.discord_channel_id} successfully")
     except Exception as e:
-        logger.error(f"Error sending Discord response: {str(e)}", exc_info=True)
+        logger.error(f"Failed to send message to channel {event.discord_channel_id}: {e}", exc_info=True)
 
+def register_discord_response_handler(dispatcher: EventDispatcher, bot) -> None:
+    """Register Discord response handler which uses primitive IDs and the bot
 
-def register_discord_response_handler(dispatcher: EventDispatcher) -> None:
-    """Register Discord response handler"""
-    dispatcher.subscribe(MatchSaved, handle_match_saved_discord_response)
+    This avoids storing the full Discord `ctx` object and keeps the event
+    pipeline decoupled. The handler fetches the channel by ID when it needs
+    to send a reply.
+    """
+    dispatcher.subscribe(MatchSaved, lambda event: handle_discord_response(
+        bot,
+        event
+    ))
     logger.info("Registered Discord response handler")
