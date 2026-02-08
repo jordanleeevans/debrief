@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, model_validator
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union, Annotated, Literal
+from typing import Any, Dict, List, Optional, Union, Literal
 from app.models.types import PrimaryWeaponType, SecondaryWeaponType, Knife
 from app.models.enums import (
     Maps,
@@ -203,19 +203,25 @@ class MatchDocument(BaseModel):
         ..., description="Timestamp when the match was saved to MongoDB"
     )
 
-ALLOWED_AGGREGATION_OPERATORS = Literal["$match", "$group", "$project", "$sort", "$limit", "$skip", "$unwind"]
-class MongoStage(BaseModel):
-    """Model for MongoDB stage documents"""
 
-    operator: ALLOWED_AGGREGATION_OPERATORS = Field(..., description="MongoDB aggregation operator")
-    expression: Dict[str, Any] = Field(
-        ..., description="Expression for the aggregation operator"
-    )
+ALLOWED_AGGREGATION_OPERATORS = Literal["$match", "$group", "$project", "$sort", "$limit", "$skip", "$unwind"]
+
+class MongoStage(BaseModel):
+    operator: ALLOWED_AGGREGATION_OPERATORS = Field(...)
+
+    # Allow scalars for operators like $limit/$skip
+    expression: Union[Dict[str, Any], int, float, str, bool, List[Any]] = Field(...)
+
+    @model_validator(mode="after")
+    def enforce_operator_shapes(self):
+        # $limit and $skip must be numeric
+        if self.operator in ("$limit", "$skip") and not isinstance(self.expression, (int, float)):
+            raise ValueError(f"{self.operator} expression must be a number")
+        # $match/$sort/$project/$group should be dicts
+        if self.operator in ("$match", "$sort", "$project", "$group") and not isinstance(self.expression, dict):
+            raise ValueError(f"{self.operator} expression must be an object")
+        return self
 
 
 class MongoPipeline(BaseModel):
-    """Model for MongoDB aggregation pipelines"""
-
-    stages: List[MongoStage] = Field(
-        ..., description="List of MongoDB aggregation stages"
-    )
+    stages: List[MongoStage]

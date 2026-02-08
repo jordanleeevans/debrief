@@ -1,5 +1,6 @@
 import logging
 from app.events import MatchSaved, EventDispatcher
+from app.events.events import GeminiQueryResult
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +58,34 @@ async def handle_match_saved(bot, event: MatchSaved):
         )
 
 
-async def handle_query_result(bot, event):
+async def handle_query_result(bot, event : GeminiQueryResult):
     """Return response from Gemini query back to Discord channel"""
-    pass
+    channel = get_channel_from_cache(bot, event.discord_channel_id)
+    if channel is None:
+        logger.info(
+            f"Channel {event.discord_channel_id} not in cache, fetching from API..."
+        )
+        channel = await fetch_channel_from_api(bot, event.discord_channel_id)
+
+    if channel is None:
+        logger.error(
+            f"Unable to send message: Channel {event.discord_channel_id} could not be found after API fetch"
+        )
+        return
+
+    result_message = (
+        f"✅ Gemini query complete for <@{event.discord_user_id}>! Database response:\n"
+        f"```json\n{event.db_response}\n```"
+    )
+
+    try:
+        await channel.send(content=result_message)
+        logger.info(f"Sent Gemini query result to channel {event.discord_channel_id}")
+    except Exception as e:
+        logger.error(
+            f"Failed to send Gemini query result to channel {event.discord_channel_id}: {e}",
+            exc_info=True,
+        )
 
 
 def register_discord_response_handler(dispatcher: EventDispatcher, bot) -> None:
@@ -70,4 +96,5 @@ def register_discord_response_handler(dispatcher: EventDispatcher, bot) -> None:
     to send a reply.
     """
     dispatcher.subscribe(MatchSaved, lambda event: handle_match_saved(bot, event))
+    dispatcher.subscribe(GeminiQueryResult, lambda event: handle_query_result(bot, event))
     logger.info("Registered Discord response handler")

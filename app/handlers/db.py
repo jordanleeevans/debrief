@@ -1,3 +1,4 @@
+import json
 import logging
 from app.events import (
     GameStatsAnalyzed,
@@ -58,18 +59,22 @@ async def handle_query_generated(
     matches_repository: MatchRepository = MatchRepository(db),
 ) -> None:
     """Handle processing of Gemini query response"""
+    from bson import json_util
+    response_dict = json_util.loads(event.response)
     logger.info(
         f"Processing Gemini query response for user {event.discord_user_id}, message {event.discord_message_id}"
     )
 
     try:
         # For now, just log the response. You could add additional processing here.
-        logger.info(f"Gemini query response: {event.response}")
-        result = matches_repository.run_query(event.response)
+        logger.info(f"Gemini query response: {response_dict}")
+        result = await matches_repository.aggregate(response_dict.get("parsed", {}))
 
-        dispatcher.emit(
+        logger.info(f"MongoDB aggregation result: {result}")
+
+        await dispatcher.emit(
             GeminiQueryResult(
-                db_response=str(result),
+                db_response=result,
                 discord_user_id=event.discord_user_id,
                 discord_message_id=event.discord_message_id,
                 discord_channel_id=event.discord_channel_id,
@@ -86,5 +91,8 @@ def register_mongodb_handlers(dispatcher: EventDispatcher) -> None:
     """Register MongoDB persistence handler"""
     dispatcher.subscribe(
         GameStatsAnalyzed, lambda event: handle_match_saved(event, dispatcher)
+    )
+    dispatcher.subscribe(
+        QueryGenerated, lambda event: handle_query_generated(event, dispatcher)
     )
     logger.info("Registered MongoDB persistence handler")

@@ -1,4 +1,5 @@
 import json
+from app.events.events import GeminiQueryResult
 import pytest
 from app.tests.mocks import FakeBot, FakeGeminiClient
 
@@ -122,4 +123,4 @@ def test_register_discord_response_handler():
     register_discord_response_handler(dispatcher, bot)
 
     # Check that the dispatcher has a subscriber for MatchSaved events
-    assert dispatcher.registered_events == [MatchSaved]
+    assert dispatcher.registered_events == [MatchSaved, GeminiQueryResult]

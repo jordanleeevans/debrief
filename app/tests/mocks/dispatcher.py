@@ -8,6 +8,7 @@ class FakeEventDispatcher(EventDispatcher):
     def __init__(self):
         super().__init__()
         self.emitted_events: list[Any] = []
+    
 
     async def emit(self, event: Any) -> None:
         """Override emit to store emitted events for assertions in tests"""

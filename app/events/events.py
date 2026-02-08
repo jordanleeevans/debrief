@@ -45,12 +45,21 @@ class MatchSaved(Event):
     game_stats: GameStatsResponse
     timestamp: datetime = None
 
+@dataclass
+class GeminiQueryRequest(Event):
+    """Event emitted when user requests a Gemini query via Discord"""
+
+    query: str
+    discord_user_id: int
+    discord_message_id: int
+    discord_channel_id: int
+    timestamp: datetime = None
 
 @dataclass
 class GeminiQueryResult(Event):
     """Event emitted when user requests a Gemini query via Discord"""
 
-    db_response: str
+    db_response: list[dict]
     discord_user_id: int
     discord_message_id: int
     discord_channel_id: int
@@ -62,7 +71,7 @@ class QueryGenerated(Event):
     """Event emitted after Gemini successfully generates a query response"""
 
     query: str
-    response: MongoPipeline
+    response: str
     discord_user_id: int
     discord_message_id: int
     discord_channel_id: int

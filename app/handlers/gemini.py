@@ -1,6 +1,6 @@
 import logging
 from app.events import AnalyzeImagesRequested, GameStatsAnalyzed, EventDispatcher
-from app.events.events import GeminiQueryResult, QueryGenerated
+from app.events.events import GeminiQueryRequest, QueryGenerated
 from app.services.gemini import GeminiClient
 from app.core.settings import settings
 
@@ -40,7 +40,7 @@ async def handle_analyze_images(
 
 
 async def handle_gemini_query(
-    event: GeminiQueryResult,
+    event: GeminiQueryRequest,
     dispatcher: EventDispatcher,
     client: GeminiClient = GeminiClient,
 ) -> None:
@@ -51,7 +51,7 @@ async def handle_gemini_query(
 
     try:
         gemini_client = client(api_key=settings.GEMINI_API_KEY)
-        db_query_response = await gemini_client.query_database(event.query)
+        db_query_response = await gemini_client.generate_db_query(event.query)
 
         logger.info(f"Successfully got Gemini query response: {db_query_response}")
 
@@ -74,6 +74,6 @@ def register_gemini_handlers(dispatcher: EventDispatcher) -> None:
         AnalyzeImagesRequested, lambda event: handle_analyze_images(event, dispatcher)
     )
     dispatcher.subscribe(
-        GeminiQueryResult, lambda event: handle_gemini_query(event, dispatcher)
+        GeminiQueryRequest, lambda event: handle_gemini_query(event, dispatcher)
     )
     logger.info("Registered Gemini analysis handler")

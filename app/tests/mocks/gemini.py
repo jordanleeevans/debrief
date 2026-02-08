@@ -17,6 +17,9 @@ class FakeGeminiClient(GeminiClient):
     def __init__(self, api_key: str = None):
         pass
 
+    async def generate_db_query(self, prompt) -> str:
+        return "result"
+
     async def generate_game_stats(
         self, image_one: bytes, image_two: bytes | None = None
     ) -> GameStatsResponse:

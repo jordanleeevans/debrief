@@ -1,6 +1,6 @@
 from google import genai
 from google.genai import types
-from app.models.schemas import GameStatsResponse, MongoPipeline
+from app.models.schemas import GameStatsResponse, MongoPipeline, MatchDocument
 
 MATCH_ANALYSIS_PROMPT = """
 Here are two images of a player in Call of Duty: Black ops 7.
@@ -12,7 +12,7 @@ the zeros tend to have a dot in the middle of them.
 """
 
 DB_QUERY_PROMPT = """
-You are a MongoDB analytics expert.
+You are a PyMongo and MongoDB analytics expert.
 
 The collection contains match documents with the following schema:
 
@@ -22,6 +22,7 @@ The collection contains match documents with the following schema:
 
 Rules:
 - One document = one match
+- You follow MongoDB aggregation syntax that PyMongo uses in Python, but you output only the stages as a JSON array.
 - Use field paths exactly as defined
 - Do NOT invent any fields that are not defined in the schema
 - Only use the fields defined in the schema for your queries
@@ -31,10 +32,11 @@ Rules:
 - No writes, deletes, or updates - only reads using aggregation pipelines.
 
 Generate a MongoDB aggregation pipeline based on the following user request:
-""" % (GameStatsResponse.model_json_schema())
+""" % (MatchDocument.model_json_schema())
 
 
 class GeminiClient:
+    model = "gemini-2.5-flash-lite"
     def __init__(self, api_key: str = None):
         if api_key is None:
             self.client = genai.Client()
@@ -46,7 +48,7 @@ class GeminiClient:
     ) -> GameStatsResponse:
         async with self.client.aio as aclient:
             response = await aclient.models.generate_content(
-                model="gemini-2.5-flash",
+                model=self.model,
                 contents=self.create_contents(image_one, image_two),
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
@@ -77,11 +79,11 @@ class GeminiClient:
     async def generate_db_query(self, prompt: str) -> list[dict]:
         async with self.client.aio as aclient:
             response = await aclient.models.generate_content(
-                model="gemini-2.5-flash",
+                model=self.model,
                 contents=DB_QUERY_PROMPT + prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
-                    response_schema=MongoPipeline.model_json_schema(),
+                    response_json_schema=MongoPipeline.model_json_schema(),
                 ),
             )
             return response.json()

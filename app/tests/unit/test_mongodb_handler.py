@@ -1,11 +1,10 @@
 import pytest
-from app.events import EventDispatcher, AnalyzeImagesRequested
-from app.events.events import GameStatsAnalyzed, MatchSaved
+from app.events import EventDispatcher
+from app.events.events import GameStatsAnalyzed, MatchSaved, QueryGenerated
 from app.tests.mocks import (
     FakeMatchRepository,
     FakeGeminiClient,
     FakeEventDispatcher,
-    FakeAsyncDatabase,
 )
 
 
@@ -17,8 +16,11 @@ def test_register_mongodb_handlers():
 
     register_mongodb_handlers(dispatcher)
 
-    assert len(dispatcher.registered_events) == 1
-    assert GameStatsAnalyzed in dispatcher.registered_events
+    expected_events = set((GameStatsAnalyzed, QueryGenerated))
+    registered_events = set(dispatcher.registered_events)
+
+    assert len(dispatcher.registered_events) == len(expected_events)
+    assert expected_events == registered_events
 
 
 @pytest.mark.asyncio

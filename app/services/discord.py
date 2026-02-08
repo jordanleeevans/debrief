@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import logging
 
-from app.events import AnalyzeImagesRequested, GeminiQueryResult
+from app.events import AnalyzeImagesRequested, GeminiQueryRequest
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +60,7 @@ async def stats(ctx):
         # so downstream handlers can reply without holding Discord context.
 
         # Emit event for analysis (decoupled from Discord)
+        await ctx.send("📊 Processing your stats... This may take a moment.")
         logger.info("Emitting AnalyzeImagesRequested event...")
         event = AnalyzeImagesRequested(
             image_one=image_one,
@@ -68,7 +69,6 @@ async def stats(ctx):
             discord_message_id=ctx.message.id,
             discord_channel_id=ctx.channel.id,
         )
-        await ctx.send("📊 Processing your stats... This may take a moment.")
 
         await ctx.bot.dispatcher.emit(event)
 
@@ -77,21 +77,25 @@ async def stats(ctx):
         await ctx.send(f"❌ Error processing request: {str(e)}")
 
 
-async def query(ctx, query_text):
+@bot.command()
+async def query(ctx):
     """Queries Gemini AI with user input and returns the response."""
-    logger.info(f"query command triggered by {ctx.author} with query: {query_text}")
+    
+    message_content = ctx.message.content[len("!query "):].strip()
+    
+
+    logger.info(f"query command triggered by {ctx.author} with query: {message_content}")
 
     try:
         # Emit event for querying Gemini (decoupled from Discord)
         logger.info("Emitting GeminiQueryRequested event...")
-        event = GeminiQueryResult(
-            query=query_text,
+        await ctx.send("🤖 Processing your query... This may take a moment.")
+        event = GeminiQueryRequest(
+            query=message_content,
             discord_user_id=ctx.author.id,
             discord_message_id=ctx.message.id,
             discord_channel_id=ctx.channel.id,
         )
-        await ctx.send("🤖 Processing your query... This may take a moment.")
-
         await ctx.bot.dispatcher.emit(event)
 
     except Exception as e:

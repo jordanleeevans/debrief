@@ -3,7 +3,9 @@ from app.events.events import (
     GameStatsAnalyzed,
     MatchSaved,
     GeminiQueryResult,
+    GeminiQueryRequest,
     QueryGenerated,
+    Event
 )
 from app.events.dispatcher import EventDispatcher
 
@@ -14,4 +16,6 @@ __all__ = [
     "EventDispatcher",
     "GeminiQueryResult",
     "QueryGenerated",
+    "GeminiQueryRequest",
+    "Event",
 ]
