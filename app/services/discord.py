@@ -2,15 +2,13 @@ import discord
 from discord.ext import commands
 import logging
 
-from app.events import AnalyzeImagesRequested, EventDispatcher
+from app.events import AnalyzeImagesRequested, GeminiQueryRequested
 
 logger = logging.getLogger(__name__)
 
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
-
-bot.dispatcher = EventDispatcher()  # Use our custom event dispatcher
 
 
 @bot.event
@@ -70,11 +68,33 @@ async def stats(ctx):
             discord_message_id=ctx.message.id,
             discord_channel_id=ctx.channel.id,
         )
+        await ctx.send("📊 Processing your stats... This may take a moment.")
+
         await ctx.bot.dispatcher.emit(event)
 
-        # Send confirmation that processing started
-        await ctx.send("📊 Processing your stats... This may take a moment.")
 
     except Exception as e:
         logger.error(f"Error in stats command: {str(e)}", exc_info=True)
+        await ctx.send(f"❌ Error processing request: {str(e)}")
+
+async def query(ctx, query_text):
+    """Queries Gemini AI with user input and returns the response."""
+    logger.info(f"query command triggered by {ctx.author} with query: {query_text}")
+
+    try:
+        # Emit event for querying Gemini (decoupled from Discord)
+        logger.info("Emitting GeminiQueryRequested event...")
+        event = GeminiQueryRequested(
+            query=query_text,
+            discord_user_id=ctx.author.id,
+            discord_message_id=ctx.message.id,
+            discord_channel_id=ctx.channel.id,
+        )
+        await ctx.send("🤖 Processing your query... This may take a moment.")
+
+        await ctx.bot.dispatcher.emit(event)
+
+
+    except Exception as e:
+        logger.error(f"Error in query command: {str(e)}", exc_info=True)
         await ctx.send(f"❌ Error processing request: {str(e)}")

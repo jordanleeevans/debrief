@@ -31,6 +31,7 @@ async def lifespan(app: FastAPI):
 
     # Set dispatcher in bot and register event handlers
     logger.info("Registering event handlers...")
+    bot.dispatcher = dispatcher  # Assign the dispatcher to the bot
     register_gemini_handlers(dispatcher)
     register_mongodb_handlers(dispatcher)
     register_discord_response_handler(dispatcher, bot)

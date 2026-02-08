@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from app.models.schemas import GameStatsResponse
+from app.models.schemas import GameStatsResponse, MongoPipeline
 
 
 class Event:
@@ -43,4 +43,25 @@ class MatchSaved(Event):
     discord_message_id: int
     discord_channel_id: int
     game_stats: GameStatsResponse
+    timestamp: datetime = None
+
+@dataclass
+class GeminiQueryRequested(Event):
+    """Event emitted when user requests a Gemini query via Discord"""
+
+    query: str
+    discord_user_id: int
+    discord_message_id: int
+    discord_channel_id: int
+    timestamp: datetime = None
+
+@dataclass
+class QueryGenerated(Event):
+    """Event emitted after Gemini successfully generates a query response"""
+
+    query: str
+    response: MongoPipeline
+    discord_user_id: int
+    discord_message_id: int
+    discord_channel_id: int
     timestamp: datetime = None

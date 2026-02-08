@@ -2,6 +2,7 @@ from app.events.events import (
     AnalyzeImagesRequested,
     GameStatsAnalyzed,
     MatchSaved,
+    GeminiQueryRequested
 )
 from app.events.dispatcher import EventDispatcher
 
@@ -10,4 +11,5 @@ __all__ = [
     "GameStatsAnalyzed",
     "MatchSaved",
     "EventDispatcher",
+    "GeminiQueryRequested",
 ]
