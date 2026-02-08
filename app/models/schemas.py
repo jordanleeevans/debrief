@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, model_validator
 from datetime import datetime
-from typing import Optional, Union, Annotated, Literal
+from typing import Any, Dict, List, Optional, Union, Annotated, Literal
 from app.models.types import PrimaryWeaponType, SecondaryWeaponType, Knife
 from app.models.enums import (
     Maps,
@@ -201,4 +201,21 @@ class MatchDocument(BaseModel):
     game_stats: GameStatsResponse = Field(..., description="Game stats response object")
     created_at: datetime = Field(
         ..., description="Timestamp when the match was saved to MongoDB"
+    )
+
+ALLOWED_AGGREGATION_OPERATORS = Literal["$match", "$group", "$project", "$sort", "$limit", "$skip", "$unwind"]
+class MongoStage(BaseModel):
+    """Model for MongoDB stage documents"""
+
+    operator: ALLOWED_AGGREGATION_OPERATORS = Field(..., description="MongoDB aggregation operator")
+    expression: Dict[str, Any] = Field(
+        ..., description="Expression for the aggregation operator"
+    )
+
+
+class MongoPipeline(BaseModel):
+    """Model for MongoDB aggregation pipelines"""
+
+    stages: List[MongoStage] = Field(
+        ..., description="List of MongoDB aggregation stages"
     )
