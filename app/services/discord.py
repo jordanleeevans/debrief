@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import logging
 
-from app.events import AnalyzeImagesRequested, GeminiQueryRequested
+from app.events import AnalyzeImagesRequested, GeminiQueryResult
 
 logger = logging.getLogger(__name__)
 
@@ -72,10 +72,10 @@ async def stats(ctx):
 
         await ctx.bot.dispatcher.emit(event)
 
-
     except Exception as e:
         logger.error(f"Error in stats command: {str(e)}", exc_info=True)
         await ctx.send(f"❌ Error processing request: {str(e)}")
+
 
 async def query(ctx, query_text):
     """Queries Gemini AI with user input and returns the response."""
@@ -84,7 +84,7 @@ async def query(ctx, query_text):
     try:
         # Emit event for querying Gemini (decoupled from Discord)
         logger.info("Emitting GeminiQueryRequested event...")
-        event = GeminiQueryRequested(
+        event = GeminiQueryResult(
             query=query_text,
             discord_user_id=ctx.author.id,
             discord_message_id=ctx.message.id,
@@ -93,7 +93,6 @@ async def query(ctx, query_text):
         await ctx.send("🤖 Processing your query... This may take a moment.")
 
         await ctx.bot.dispatcher.emit(event)
-
 
     except Exception as e:
         logger.error(f"Error in query command: {str(e)}", exc_info=True)

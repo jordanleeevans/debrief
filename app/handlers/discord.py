@@ -27,7 +27,7 @@ async def fetch_channel_from_api(bot, channel_id: int):
         return None
 
 
-async def handle_discord_response(bot, event: MatchSaved):
+async def handle_match_saved(bot, event: MatchSaved):
     """Helper function to send message to Discord channel"""
     channel = get_channel_from_cache(bot, event.discord_channel_id)
     if channel is None:
@@ -57,6 +57,11 @@ async def handle_discord_response(bot, event: MatchSaved):
         )
 
 
+async def handle_query_result(bot, event):
+    """Return response from Gemini query back to Discord channel"""
+    pass
+
+
 def register_discord_response_handler(dispatcher: EventDispatcher, bot) -> None:
     """Register Discord response handler which uses primitive IDs and the bot
 
@@ -64,5 +69,5 @@ def register_discord_response_handler(dispatcher: EventDispatcher, bot) -> None:
     pipeline decoupled. The handler fetches the channel by ID when it needs
     to send a reply.
     """
-    dispatcher.subscribe(MatchSaved, lambda event: handle_discord_response(bot, event))
+    dispatcher.subscribe(MatchSaved, lambda event: handle_match_saved(bot, event))
     logger.info("Registered Discord response handler")

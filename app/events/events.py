@@ -45,15 +45,17 @@ class MatchSaved(Event):
     game_stats: GameStatsResponse
     timestamp: datetime = None
 
+
 @dataclass
-class GeminiQueryRequested(Event):
+class GeminiQueryResult(Event):
     """Event emitted when user requests a Gemini query via Discord"""
 
-    query: str
+    db_response: str
     discord_user_id: int
     discord_message_id: int
     discord_channel_id: int
     timestamp: datetime = None
+
 
 @dataclass
 class QueryGenerated(Event):

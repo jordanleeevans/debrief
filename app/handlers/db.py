@@ -1,5 +1,11 @@
 import logging
-from app.events import GameStatsAnalyzed, MatchSaved, EventDispatcher
+from app.events import (
+    GameStatsAnalyzed,
+    MatchSaved,
+    EventDispatcher,
+    QueryGenerated,
+)
+from app.events.events import GeminiQueryResult
 from app.repositories import MatchRepository
 from app.models.schemas import MatchDocument
 from app.db.mongo import db
@@ -43,6 +49,36 @@ async def handle_match_saved(
 
     except Exception as e:
         logger.error(f"Error saving match to MongoDB: {str(e)}", exc_info=True)
+        raise
+
+
+async def handle_query_generated(
+    event: QueryGenerated,
+    dispatcher: EventDispatcher,
+    matches_repository: MatchRepository = MatchRepository(db),
+) -> None:
+    """Handle processing of Gemini query response"""
+    logger.info(
+        f"Processing Gemini query response for user {event.discord_user_id}, message {event.discord_message_id}"
+    )
+
+    try:
+        # For now, just log the response. You could add additional processing here.
+        logger.info(f"Gemini query response: {event.response}")
+        result = matches_repository.run_query(event.response)
+
+        dispatcher.emit(
+            GeminiQueryResult(
+                db_response=str(result),
+                discord_user_id=event.discord_user_id,
+                discord_message_id=event.discord_message_id,
+                discord_channel_id=event.discord_channel_id,
+                timestamp=event.timestamp,
+            )
+        )
+
+    except Exception as e:
+        logger.error(f"Error processing Gemini query response: {str(e)}", exc_info=True)
         raise
 
 

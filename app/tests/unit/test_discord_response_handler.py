@@ -57,7 +57,7 @@ async def test_fetch_channel_from_api_handles_exception(monkeypatch):
 @pytest.mark.asyncio
 async def test_handle_discord_response_sends_message():
     """Test that handle_discord_response sends a message to the correct channel"""
-    from app.handlers.discord import handle_discord_response
+    from app.handlers.discord import handle_match_saved
     from app.events import MatchSaved
 
     class FakeChannel:
@@ -80,7 +80,7 @@ async def test_handle_discord_response_sends_message():
         discord_channel_id=123,
     )
 
-    await handle_discord_response(bot, event)
+    await handle_match_saved(bot, event)
     assert len(fake_channel.sent_messages) == 1
     assert (
         json.loads(
@@ -93,7 +93,7 @@ async def test_handle_discord_response_sends_message():
 @pytest.mark.asyncio
 async def test_handle_discord_response_channel_not_found():
     """Test that handle_discord_response logs an error when the channel cannot be found"""
-    from app.handlers.discord import handle_discord_response
+    from app.handlers.discord import handle_match_saved
     from app.events import MatchSaved
 
     bot = FakeBot()
@@ -107,7 +107,7 @@ async def test_handle_discord_response_channel_not_found():
         discord_channel_id=123,
     )
 
-    await handle_discord_response(bot, event)
+    await handle_match_saved(bot, event)
     # Since the channel is not found, we expect an error log but no exceptions raised
 
 
