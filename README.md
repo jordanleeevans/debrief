@@ -1,4 +1,4 @@
-# Debrief API
+# Debrief
 
 ![CI](https://github.com/jordanleeevans/debrief/actions/workflows/ci.yml/badge.svg)
 ![Coverage](https://codecov.io/gh/jordanleeevans/debrief/branch/main/graph/badge.svg)
@@ -11,13 +11,13 @@ A Discord bot powered by Google's Gemini AI that automatically extracts and anal
 
 - **AI-Powered OCR**: Gemini 2.5 Flash extracts stats from game screenshots
 - **Discord Commands**: `/stats` and `/query` for analysis and database queries
-- **CQRS Architecture**: Separate Command/Event handling with CommandBus and EventDispatcher
+- **CQRS Architecture**: Separate Command/Event handling with `CommandBus` and `EventDispatcher`
 - **MongoDB Storage**: Persistent stats tracking with aggregation support
 - **Type-Safe**: Pydantic models for all data validation
 
 ## Quick Start
 
-**Prerequisites:** Docker, Discord Bot Token, Google Gemini API Key
+**Prerequisites:** Docker, [Discord Bot Token](https://discord.com/developers/docs/intro), [Google Gemini API Key](https://aistudio.google.com/)
 
 1. Clone and configure:
    ```bash
@@ -74,15 +74,44 @@ uv sync --all-extras --dev
 uv run pytest
 
 # Run with coverage
-docker exec -it debrief_api uv run pytest --cov=app --cov-report=term-missing
+uv run coverage run -m pytest
+uv run coverage report -m
 ```
 
 ## Supported Data
 
-**Maps:** SCAR, RAID, EXPOSURE, DEN, COLOSSUS, BLACKHEART  
-**Modes:** HARDPOINT, SEARCH AND DESTROY, OVERLOAD  
-**Teams:** TEAM GUILD, JSOC  
-**Weapons:** M15 MOD 0, PEACEKEEPER MK1, DRAVEC 45, VS RECON, JÄGER 45, CODA 9
+### Maps
+| Maps |
+| --- |
+| SCAR |
+| RAID |
+| EXPOSURE |
+| DEN |
+| COLOSSUS |
+| BLACKHEART |
+
+### Modes
+| Modes |
+| --- |
+| HARDPOINT |
+| SEARCH AND DESTROY |
+| OVERLOAD |
+
+### Teams
+| Teams |
+| --- |
+| TEAM GUILD |
+| JSOC |
+
+### Weapons
+| Weapons |
+| --- |
+| M15 MOD 0 |
+| PEACEKEEPER MK1 |
+| DRAVEC 45 |
+| VS RECON |
+| JÄGER 45 |
+| CODA 9 |
 
 ---
 
