@@ -10,15 +10,17 @@ from app.models.schemas import (
 
 
 class FakeGeminiClient(GeminiClient):
+    """Simplified mock that overrides only the methods we use in tests."""
 
     def __call__(self, api_key: str = None):
         return self
 
     def __init__(self, api_key: str = None):
+        # Don't initialize the real client
         pass
 
-    async def generate_db_query(self, prompt) -> dict:
-        # Return a fake MongoDB pipeline as a dict (not JSON string)
+    async def generate_db_query(self, prompt: str) -> dict:
+        """Return a simple valid MongoDB pipeline."""
         return {
             "stages": [{"operator": "$match", "expression": {"discord_user_id": 123}}]
         }

@@ -32,11 +32,14 @@ Rules:
 - No writes, deletes, or updates - only reads using aggregation pipelines.
 
 Generate a MongoDB aggregation pipeline based on the following user request:
-""" % (MatchDocument.model_json_schema())
+""" % (
+    MatchDocument.model_json_schema()
+)
 
 
 class GeminiClient:
     model = "gemini-2.5-flash-lite"
+
     def __init__(self, api_key: str = None):
         if api_key is None:
             self.client = genai.Client()
@@ -75,8 +78,8 @@ class GeminiClient:
                 )
             )
         return contents
-    
-    async def generate_db_query(self, prompt: str) -> list[dict]:
+
+    async def generate_db_query(self, prompt: str) -> dict:
         async with self.client.aio as aclient:
             response = await aclient.models.generate_content(
                 model=self.model,
@@ -86,4 +89,4 @@ class GeminiClient:
                     response_json_schema=MongoPipeline.model_json_schema(),
                 ),
             )
-            return response.json()
+            return response.model_dump_json()

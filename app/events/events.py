@@ -25,30 +25,34 @@ class Event(BaseModel):
     )
 
 
-class GameStatsAnalyzed(Event):
+class DiscordContext(BaseModel):
+    """Context for events that originate from Discord interactions.
+
+    This includes metadata about the Discord user, message, and channel
+    that triggered the event. This allows handlers to send responses back to
+    the correct place in Discord.
+    """
+
+    discord_user_id: int = Field(..., gt=0, description="Discord user ID")
+    discord_message_id: int = Field(..., gt=0, description="Discord message ID")
+    discord_channel_id: int = Field(..., gt=0, description="Discord channel ID")
+
+
+class GameStatsAnalyzed(Event, DiscordContext):
     """Event emitted after Gemini successfully analyzed game stats"""
 
     game_stats: GameStatsResponse
-    discord_user_id: int = Field(..., gt=0)
-    discord_message_id: int = Field(..., gt=0)
-    discord_channel_id: int = Field(..., gt=0)
 
 
-class MatchSaved(Event):
+class MatchSaved(Event, DiscordContext):
     """Event emitted after match data is saved to MongoDB"""
 
     match_id: str = Field(..., min_length=1)
-    discord_user_id: int = Field(..., gt=0)
-    discord_message_id: int = Field(..., gt=0)
-    discord_channel_id: int = Field(..., gt=0)
     game_stats: GameStatsResponse
 
 
-class QueryExecuted(Event):
+class QueryExecuted(Event, DiscordContext):
     """Event emitted after database query is successfully executed"""
 
     query: str = Field(..., min_length=1)
     db_response: list[dict[str, Any]]
-    discord_user_id: int = Field(..., gt=0)
-    discord_message_id: int = Field(..., gt=0)
-    discord_channel_id: int = Field(..., gt=0)

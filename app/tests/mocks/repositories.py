@@ -1,4 +1,4 @@
-from app.models.schemas import MatchDocument
+from app.models.schemas import MatchDocument, MongoPipeline
 
 
 class FakeMatchRepository:
@@ -16,6 +16,8 @@ class FakeMatchRepository:
 
     async def aggregate(self, pipeline: dict) -> list[dict]:
         """Simulate running an aggregation pipeline"""
+        # Validate the pipeline using MongoPipeline
+        MongoPipeline.model_validate(pipeline)
         # For testing, just return an empty list
         # In real tests, you could implement basic filtering logic
         return []
