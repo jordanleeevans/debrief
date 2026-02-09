@@ -14,7 +14,6 @@ A Discord bot powered by Google's Gemini AI that automatically extracts and anal
 - **CQRS Architecture**: Separate Command/Event handling with CommandBus and EventDispatcher
 - **MongoDB Storage**: Persistent stats tracking with aggregation support
 - **Type-Safe**: Pydantic models for all data validation
-- **Comprehensive Tests**: 83 tests with 90%+ coverage
 
 ## Quick Start
 
