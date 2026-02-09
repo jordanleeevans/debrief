@@ -7,7 +7,7 @@
 
 A Discord bot powered by Google's Gemini AI that automatically extracts and analyzes Call of Duty: Black Ops 7 game statistics from screenshot images.
 
-## ✨ Features
+## Features
 
 - **AI-Powered OCR**: Gemini 2.5 Flash extracts stats from game screenshots
 - **Discord Commands**: `/stats` and `/query` for analysis and database queries
@@ -16,7 +16,7 @@ A Discord bot powered by Google's Gemini AI that automatically extracts and anal
 - **Type-Safe**: Pydantic models for all data validation
 - **Comprehensive Tests**: 83 tests with 90%+ coverage
 
-## � Quick Start
+## Quick Start
 
 **Prerequisites:** Docker, Discord Bot Token, Google Gemini API Key
 
@@ -33,7 +33,7 @@ A Discord bot powered by Google's Gemini AI that automatically extracts and anal
    docker compose up --build -d
    ```
 
-## ⚙️ Configuration
+## Configuration
 
 Create `.env` with:
 ```env
@@ -78,16 +78,12 @@ uv run pytest
 docker exec -it debrief_api uv run pytest --cov=app --cov-report=term-missing
 ```
 
-## 📊 Supported Data
+## Supported Data
 
 **Maps:** SCAR, RAID, EXPOSURE, DEN, COLOSSUS, BLACKHEART  
 **Modes:** HARDPOINT, SEARCH AND DESTROY, OVERLOAD  
 **Teams:** TEAM GUILD, JSOC  
 **Weapons:** M15 MOD 0, PEACEKEEPER MK1, DRAVEC 45, VS RECON, JÄGER 45, CODA 9
-
-## 📄 License
-
-MIT License
 
 ---
 
