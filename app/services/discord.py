@@ -13,7 +13,6 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print("Logged in as %s", bot.user)
     logger.debug("Logged in as %s", bot.user)
 
 
@@ -80,11 +79,18 @@ async def stats(ctx):
 @bot.command()
 async def query(ctx):
     """Queries Gemini AI with user input and returns the response."""
-    
-    message_content = ctx.message.content[len("!query "):].strip()
-    
 
-    logger.info(f"query command triggered by {ctx.author} with query: {message_content}")
+    message_content = ctx.message.content[len("!query ") :].strip()
+
+    if not message_content:
+        error_msg = "Please provide a query after the command. For example: `!query What are some tips for improving my aim?`"
+        logger.warning(error_msg)
+        await ctx.send(error_msg)
+        return
+
+    logger.info(
+        f"query command triggered by {ctx.author} with query: {message_content}"
+    )
 
     try:
         # Emit event for querying Gemini (decoupled from Discord)

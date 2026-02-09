@@ -1,4 +1,5 @@
 import asyncio
+from app.tests.mocks import FakeEventDispatcher
 
 
 class FakeBot:
@@ -14,6 +15,7 @@ class FakeBot:
         self.started_with = None
         self._stop_event = asyncio.Event()
         self.cached_channels = {}
+        self.dispatcher = FakeEventDispatcher()
 
     async def start(self, token: str):
         self.started_with = token
@@ -40,3 +42,54 @@ class FakeBot:
         )  # Replace with actual channel object in real implementation
         self.cached_channels[channel_id] = fake_channel
         return fake_channel
+
+
+class FakeAttachment:
+    def __init__(self, data: bytes, size: int | None = None):
+        self._data = data
+        self.size = len(data) if size is None else size
+
+    async def read(self):
+        return self._data
+
+
+class FakeAuthor:
+    def __init__(self, id: int = 123, name: str = "Tester"):
+        self.id = id
+        self.name = name
+
+
+class FakeMessage:
+    def __init__(
+        self,
+        id: int = 1,
+        attachments: list | None = None,
+        author: FakeAuthor | None = None,
+    ):
+        self.id = id
+        self.attachments = attachments or []
+        self.author = author or FakeAuthor()
+        self.content = ""
+
+
+class FakeChannel:
+    def __init__(self, id: int = 456):
+        self.id = id
+
+
+class FakeCtx:
+    def __init__(
+        self,
+        message: FakeMessage | None = None,
+        author: FakeAuthor | None = None,
+        bot: FakeBot | None = None,
+        channel: FakeChannel | None = None,
+    ):
+        self.message = message or FakeMessage()
+        self.author = author or self.message.author
+        self.bot = bot or FakeBot()
+        self.channel = channel or FakeChannel()
+        self.sent: list[str] = []
+
+    async def send(self, content: str):
+        self.sent.append(content)

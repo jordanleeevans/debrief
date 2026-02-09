@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
 
     try:
         logger.info("Starting Discord bot...")
-        bot_task = asyncio.create_task(bot.start(settings.DISCORD_BOT_TOKEN))
+        asyncio.create_task(bot.start(settings.DISCORD_BOT_TOKEN))
         # Give the bot a moment to start connecting
         await asyncio.sleep(1)
         logger.info("Discord bot task created successfully.")

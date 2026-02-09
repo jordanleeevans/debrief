@@ -1,6 +1,7 @@
 import time
 
 import pytest
+from http import HTTPStatus
 
 # Skip if fastapi isn't available in this environment
 pytest.importorskip("fastapi")
@@ -30,7 +31,7 @@ def test_lifespan_starts_and_stops_bot(monkeypatch):
 
         # Basic request while the bot is running
         r = client.get("/")
-        assert r.status_code == 200
+        assert r.status_code == HTTPStatus.OK
 
     # After exiting the context the shutdown should have been processed
     deadline = time.time() + 1.0
