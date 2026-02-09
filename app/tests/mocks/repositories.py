@@ -12,4 +12,10 @@ class FakeMatchRepository:
         if not isinstance(match_data, MatchDocument):
             raise ValueError("match_data must be an instance of MatchDocument")
         self.matches.append(match_data.model_dump())
-        return len(self.matches) - 1
+        return str(len(self.matches) - 1)
+
+    async def aggregate(self, pipeline: dict) -> list[dict]:
+        """Simulate running an aggregation pipeline"""
+        # For testing, just return an empty list
+        # In real tests, you could implement basic filtering logic
+        return []

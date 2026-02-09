@@ -1,5 +1,5 @@
 import json
-from app.events.events import GeminiQueryResult
+from app.events.events import QueryExecuted
 import pytest
 from app.tests.mocks import FakeBot, FakeGeminiClient
 
@@ -58,7 +58,7 @@ async def test_fetch_channel_from_api_handles_exception(monkeypatch):
 @pytest.mark.asyncio
 async def test_handle_discord_response_sends_message():
     """Test that handle_discord_response sends a message to the correct channel"""
-    from app.handlers.discord import handle_match_saved
+    from app.handlers.discord import handle_match_saved_event
     from app.events import MatchSaved
 
     class FakeChannel:
@@ -81,7 +81,7 @@ async def test_handle_discord_response_sends_message():
         discord_channel_id=123,
     )
 
-    await handle_match_saved(bot, event)
+    await handle_match_saved_event(bot, event)
     assert len(fake_channel.sent_messages) == 1
     assert (
         json.loads(
@@ -94,7 +94,7 @@ async def test_handle_discord_response_sends_message():
 @pytest.mark.asyncio
 async def test_handle_discord_response_channel_not_found():
     """Test that handle_discord_response logs an error when the channel cannot be found"""
-    from app.handlers.discord import handle_match_saved
+    from app.handlers.discord import handle_match_saved_event
     from app.events import MatchSaved
 
     bot = FakeBot()
@@ -108,19 +108,19 @@ async def test_handle_discord_response_channel_not_found():
         discord_channel_id=123,
     )
 
-    await handle_match_saved(bot, event)
+    await handle_match_saved_event(bot, event)
     # Since the channel is not found, we expect an error log but no exceptions raised
 
 
-def test_register_discord_response_handler():
-    """Test that register_discord_response_handler subscribes the handler to the dispatcher"""
-    from app.handlers.discord import register_discord_response_handler
+def test_register_discord_event_handlers():
+    """Test that register_discord_event_handlers subscribes the handler to the dispatcher"""
+    from app.handlers.discord import register_discord_event_handlers
     from app.events import EventDispatcher, MatchSaved
 
     dispatcher = EventDispatcher()
     bot = FakeBot()
 
-    register_discord_response_handler(dispatcher, bot)
+    register_discord_event_handlers(dispatcher, bot)
 
-    # Check that the dispatcher has a subscriber for MatchSaved events
-    assert dispatcher.registered_events == [MatchSaved, GeminiQueryResult]
+    # Check that the dispatcher has a subscriber for MatchSaved and QueryExecuted events
+    assert set(dispatcher.registered_events) == {MatchSaved, QueryExecuted}

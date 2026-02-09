@@ -2,6 +2,17 @@ import asyncio
 from app.tests.mocks import FakeEventDispatcher
 
 
+class FakeCommandBus:
+    """Fake command bus for testing"""
+
+    def __init__(self):
+        self.executed_commands = []
+
+    async def execute(self, command):
+        """Record executed commands"""
+        self.executed_commands.append(command)
+
+
 class FakeBot:
     """A very small fake bot that cooperates with the app lifespan.
 
@@ -16,6 +27,7 @@ class FakeBot:
         self._stop_event = asyncio.Event()
         self.cached_channels = {}
         self.dispatcher = FakeEventDispatcher()
+        self.command_bus = FakeCommandBus()
 
     async def start(self, token: str):
         self.started_with = token

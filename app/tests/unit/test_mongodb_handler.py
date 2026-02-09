@@ -1,6 +1,6 @@
 import pytest
 from app.events import EventDispatcher
-from app.events.events import GameStatsAnalyzed, MatchSaved, QueryGenerated
+from app.events.events import GameStatsAnalyzed, MatchSaved
 from app.tests.mocks import (
     FakeMatchRepository,
     FakeGeminiClient,
@@ -8,15 +8,15 @@ from app.tests.mocks import (
 )
 
 
-def test_register_mongodb_handlers():
-    """Test that the MongoDB handlers are registered correctly"""
+def test_register_mongodb_event_handlers():
+    """Test that the MongoDB event handlers are registered correctly"""
     dispatcher = EventDispatcher()
 
-    from app.handlers.db import register_mongodb_handlers
+    from app.handlers.db import register_mongodb_event_handlers
 
-    register_mongodb_handlers(dispatcher)
+    register_mongodb_event_handlers(dispatcher)
 
-    expected_events = set((GameStatsAnalyzed, QueryGenerated))
+    expected_events = set((GameStatsAnalyzed,))
     registered_events = set(dispatcher.registered_events)
 
     assert len(dispatcher.registered_events) == len(expected_events)
@@ -26,7 +26,7 @@ def test_register_mongodb_handlers():
 @pytest.mark.asyncio
 async def test_handle_game_stats_analyzed_emits_match_saved():
     """Test that the GameStatsAnalyzed handler emits MatchSaved event"""
-    from app.handlers.db import handle_match_saved
+    from app.handlers.db import handle_game_stats_analyzed
 
     game_stats = await FakeGeminiClient().generate_game_stats(b"image1", b"image2")
     dispatcher = FakeEventDispatcher()
@@ -38,7 +38,7 @@ async def test_handle_game_stats_analyzed_emits_match_saved():
     )
     fake_match_repo = FakeMatchRepository()
 
-    await handle_match_saved(event, dispatcher, fake_match_repo)
+    await handle_game_stats_analyzed(event, dispatcher, fake_match_repo)
 
     assert len(dispatcher.emitted_events) == 1
 
@@ -50,7 +50,7 @@ async def test_handle_game_stats_analyzed_emits_match_saved():
 @pytest.mark.asyncio
 async def test_handle_game_stats_analyzed_saves_to_repository():
     """Test that the GameStatsAnalyzed handler saves match data to the repository"""
-    from app.handlers.db import handle_match_saved
+    from app.handlers.db import handle_game_stats_analyzed
 
     game_stats = await FakeGeminiClient().generate_game_stats(b"image1", b"image2")
     dispatcher = FakeEventDispatcher()
@@ -62,7 +62,7 @@ async def test_handle_game_stats_analyzed_saves_to_repository():
     )
     fake_match_repo = FakeMatchRepository()
 
-    await handle_match_saved(event, dispatcher, fake_match_repo)
+    await handle_game_stats_analyzed(event, dispatcher, fake_match_repo)
 
     assert len(fake_match_repo.matches) == 1
     saved_match = fake_match_repo.matches[0]

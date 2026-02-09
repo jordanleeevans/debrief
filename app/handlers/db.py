@@ -1,26 +1,25 @@
-import json
 import logging
 from app.events import (
     GameStatsAnalyzed,
     MatchSaved,
     EventDispatcher,
-    QueryGenerated,
 )
-from app.events.events import GeminiQueryResult
 from app.repositories import MatchRepository
 from app.models.schemas import MatchDocument
 from app.db.mongo import db
-from pymongo.asynchronous.database import AsyncDatabase
 
 logger = logging.getLogger(__name__)
 
 
-async def handle_match_saved(
+async def handle_game_stats_analyzed(
     event: GameStatsAnalyzed,
     dispatcher: EventDispatcher,
     matches_repository: MatchRepository = MatchRepository(db),
 ) -> None:
-    """Handle saving analyzed game stats to MongoDB"""
+    """Handle GameStatsAnalyzed event by saving match data to MongoDB.
+
+    This is an event subscriber - it reacts to something that already happened.
+    """
     logger.info(
         f"Saving match data for user {event.discord_user_id}, message {event.discord_message_id}"
     )
@@ -38,7 +37,7 @@ async def handle_match_saved(
 
         logger.info(f"Successfully saved match with ID: {match_id}")
 
-        # Emit MatchSaved event for any other handlers
+        # Emit MatchSaved EVENT for other subscribers
         saved_event = MatchSaved(
             match_id=match_id,
             discord_user_id=event.discord_user_id,
@@ -53,46 +52,13 @@ async def handle_match_saved(
         raise
 
 
-async def handle_query_generated(
-    event: QueryGenerated,
-    dispatcher: EventDispatcher,
-    matches_repository: MatchRepository = MatchRepository(db),
-) -> None:
-    """Handle processing of Gemini query response"""
-    from bson import json_util
-    response_dict = json_util.loads(event.response)
-    logger.info(
-        f"Processing Gemini query response for user {event.discord_user_id}, message {event.discord_message_id}"
-    )
+def register_mongodb_event_handlers(dispatcher: EventDispatcher) -> None:
+    """Register event subscribers for MongoDB persistence.
 
-    try:
-        # For now, just log the response. You could add additional processing here.
-        logger.info(f"Gemini query response: {response_dict}")
-        result = await matches_repository.aggregate(response_dict.get("parsed", {}))
-
-        logger.info(f"MongoDB aggregation result: {result}")
-
-        await dispatcher.emit(
-            GeminiQueryResult(
-                db_response=result,
-                discord_user_id=event.discord_user_id,
-                discord_message_id=event.discord_message_id,
-                discord_channel_id=event.discord_channel_id,
-                timestamp=event.timestamp,
-            )
-        )
-
-    except Exception as e:
-        logger.error(f"Error processing Gemini query response: {str(e)}", exc_info=True)
-        raise
-
-
-def register_mongodb_handlers(dispatcher: EventDispatcher) -> None:
-    """Register MongoDB persistence handler"""
+    These handlers react to events that have already happened.
+    Events can have multiple subscribers.
+    """
     dispatcher.subscribe(
-        GameStatsAnalyzed, lambda event: handle_match_saved(event, dispatcher)
+        GameStatsAnalyzed, lambda event: handle_game_stats_analyzed(event, dispatcher)
     )
-    dispatcher.subscribe(
-        QueryGenerated, lambda event: handle_query_generated(event, dispatcher)
-    )
-    logger.info("Registered MongoDB persistence handler")
+    logger.info("Registered MongoDB event handlers")

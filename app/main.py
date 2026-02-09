@@ -6,12 +6,13 @@ from fastapi import FastAPI
 from http import HTTPStatus
 from app.core.settings import settings
 from app.events import EventDispatcher
+from app.commands import CommandBus
 from app.services.discord import bot
 from app.models.schemas import GameStatsResponse
 from app.handlers import (
-    register_gemini_handlers,
-    register_mongodb_handlers,
-    register_discord_response_handler,
+    register_gemini_command_handlers,
+    register_mongodb_event_handlers,
+    register_discord_event_handlers,
 )
 
 # Configure logging
@@ -21,21 +22,30 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Create dispatcher instance
-dispatcher = EventDispatcher()
+# Create dispatcher and command bus instances
+event_dispatcher = EventDispatcher()
+command_bus = CommandBus()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Initialising start up configurations.")
 
-    # Set dispatcher in bot and register event handlers
-    logger.info("Registering event handlers...")
-    bot.dispatcher = dispatcher  # Assign the dispatcher to the bot
-    register_gemini_handlers(dispatcher)
-    register_mongodb_handlers(dispatcher)
-    register_discord_response_handler(dispatcher, bot)
-    logger.info("Event handlers registered successfully.")
+    # Assign dispatcher and command bus to bot
+    logger.info("Setting up command bus and event dispatcher...")
+    bot.command_bus = command_bus
+    bot.event_dispatcher = event_dispatcher
+
+    # Register COMMAND handlers (1 handler per command)
+    logger.info("Registering command handlers...")
+    register_gemini_command_handlers(command_bus, event_dispatcher)
+    logger.info("Command handlers registered successfully.")
+
+    # Register EVENT subscribers (multiple subscribers per event)
+    logger.info("Registering event subscribers...")
+    register_mongodb_event_handlers(event_dispatcher)
+    register_discord_event_handlers(event_dispatcher, bot)
+    logger.info("Event subscribers registered successfully.")
 
     try:
         logger.info("Starting Discord bot...")

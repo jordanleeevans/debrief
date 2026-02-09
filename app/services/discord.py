@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import logging
 
-from app.events import AnalyzeImagesRequested, GeminiQueryRequest
+from app.commands import AnalyzeImagesCommand, QueryDatabaseCommand
 
 logger = logging.getLogger(__name__)
 
@@ -55,13 +55,10 @@ async def stats(ctx):
         if len(ctx.message.attachments) == 2:
             image_two = await ctx.message.attachments[1].read()
 
-        # Include primitive identifiers (channel + message) in the event
-        # so downstream handlers can reply without holding Discord context.
-
-        # Emit event for analysis (decoupled from Discord)
+        # Execute COMMAND (not event) - commands represent intent
         await ctx.send("📊 Processing your stats... This may take a moment.")
-        logger.info("Emitting AnalyzeImagesRequested event...")
-        event = AnalyzeImagesRequested(
+        logger.info("Executing AnalyzeImagesCommand...")
+        command = AnalyzeImagesCommand(
             image_one=image_one,
             image_two=image_two,
             discord_user_id=ctx.author.id,
@@ -69,7 +66,7 @@ async def stats(ctx):
             discord_channel_id=ctx.channel.id,
         )
 
-        await ctx.bot.dispatcher.emit(event)
+        await ctx.bot.command_bus.execute(command)
 
     except Exception as e:
         logger.error(f"Error in stats command: {str(e)}", exc_info=True)
@@ -93,16 +90,16 @@ async def query(ctx):
     )
 
     try:
-        # Emit event for querying Gemini (decoupled from Discord)
-        logger.info("Emitting GeminiQueryRequested event...")
+        # Execute COMMAND (not event) - commands represent intent
+        logger.info("Executing QueryDatabaseCommand...")
         await ctx.send("🤖 Processing your query... This may take a moment.")
-        event = GeminiQueryRequest(
+        command = QueryDatabaseCommand(
             query=message_content,
             discord_user_id=ctx.author.id,
             discord_message_id=ctx.message.id,
             discord_channel_id=ctx.channel.id,
         )
-        await ctx.bot.dispatcher.emit(event)
+        await ctx.bot.command_bus.execute(command)
 
     except Exception as e:
         logger.error(f"Error in query command: {str(e)}", exc_info=True)

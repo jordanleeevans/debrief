@@ -1,78 +1,54 @@
-from dataclasses import dataclass
-from datetime import datetime
-from app.models.schemas import GameStatsResponse, MongoPipeline
+from datetime import datetime, timezone
+from typing import Any
+from pydantic import BaseModel, Field, ConfigDict
+from app.models.schemas import GameStatsResponse
 
 
-class Event:
-    """Base class for all events."""
+class Event(BaseModel):
+    """Base class for all events.
 
-    def __post_init__(self):
-        if not hasattr(self, "timestamp") or self.timestamp is None:
-            self.timestamp = datetime.now(datetime.now().astimezone().tzinfo)
+    Events represent facts - things that have already happened.
+    They use past tense naming (GameStatsAnalyzed, MatchSaved).
+    Events can have multiple subscribers.
+    """
+
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="When the event occurred",
+    )
+
+    model_config = ConfigDict(
+        # Events should be immutable once created
+        frozen=True,
+        # Allow arbitrary types for flexibility
+        arbitrary_types_allowed=True,
+    )
 
 
-@dataclass
-class AnalyzeImagesRequested(Event):
-    """Event emitted when user requests image analysis via Discord"""
-
-    image_one: bytes
-    image_two: bytes | None
-    discord_user_id: int
-    discord_message_id: int
-    discord_channel_id: int
-    timestamp: datetime = None
-
-
-@dataclass
 class GameStatsAnalyzed(Event):
     """Event emitted after Gemini successfully analyzed game stats"""
 
     game_stats: GameStatsResponse
-    discord_user_id: int
-    discord_message_id: int
-    discord_channel_id: int
-    timestamp: datetime = None
+    discord_user_id: int = Field(..., gt=0)
+    discord_message_id: int = Field(..., gt=0)
+    discord_channel_id: int = Field(..., gt=0)
 
 
-@dataclass
 class MatchSaved(Event):
     """Event emitted after match data is saved to MongoDB"""
 
-    match_id: str
-    discord_user_id: int
-    discord_message_id: int
-    discord_channel_id: int
+    match_id: str = Field(..., min_length=1)
+    discord_user_id: int = Field(..., gt=0)
+    discord_message_id: int = Field(..., gt=0)
+    discord_channel_id: int = Field(..., gt=0)
     game_stats: GameStatsResponse
-    timestamp: datetime = None
-
-@dataclass
-class GeminiQueryRequest(Event):
-    """Event emitted when user requests a Gemini query via Discord"""
-
-    query: str
-    discord_user_id: int
-    discord_message_id: int
-    discord_channel_id: int
-    timestamp: datetime = None
-
-@dataclass
-class GeminiQueryResult(Event):
-    """Event emitted when user requests a Gemini query via Discord"""
-
-    db_response: list[dict]
-    discord_user_id: int
-    discord_message_id: int
-    discord_channel_id: int
-    timestamp: datetime = None
 
 
-@dataclass
-class QueryGenerated(Event):
-    """Event emitted after Gemini successfully generates a query response"""
+class QueryExecuted(Event):
+    """Event emitted after database query is successfully executed"""
 
-    query: str
-    response: str
-    discord_user_id: int
-    discord_message_id: int
-    discord_channel_id: int
-    timestamp: datetime = None
+    query: str = Field(..., min_length=1)
+    db_response: list[dict[str, Any]]
+    discord_user_id: int = Field(..., gt=0)
+    discord_message_id: int = Field(..., gt=0)
+    discord_channel_id: int = Field(..., gt=0)

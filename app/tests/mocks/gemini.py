@@ -17,8 +17,11 @@ class FakeGeminiClient(GeminiClient):
     def __init__(self, api_key: str = None):
         pass
 
-    async def generate_db_query(self, prompt) -> str:
-        return "result"
+    async def generate_db_query(self, prompt) -> dict:
+        # Return a fake MongoDB pipeline as a dict (not JSON string)
+        return {
+            "stages": [{"operator": "$match", "expression": {"discord_user_id": 123}}]
+        }
 
     async def generate_game_stats(
         self, image_one: bytes, image_two: bytes | None = None

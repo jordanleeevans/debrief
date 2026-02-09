@@ -1,6 +1,5 @@
 import logging
-from app.events import MatchSaved, EventDispatcher
-from app.events.events import GeminiQueryResult
+from app.events import MatchSaved, QueryExecuted, EventDispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +27,11 @@ async def fetch_channel_from_api(bot, channel_id: int):
         return None
 
 
-async def handle_match_saved(bot, event: MatchSaved):
-    """Helper function to send message to Discord channel"""
+async def handle_match_saved_event(bot, event: MatchSaved):
+    """Event subscriber that sends match saved notification to Discord.
+
+    This is an event subscriber - it reacts to something that already happened.
+    """
     channel = get_channel_from_cache(bot, event.discord_channel_id)
     if channel is None:
         logger.info(
@@ -58,8 +60,11 @@ async def handle_match_saved(bot, event: MatchSaved):
         )
 
 
-async def handle_query_result(bot, event : GeminiQueryResult):
-    """Return response from Gemini query back to Discord channel"""
+async def handle_query_executed_event(bot, event: QueryExecuted):
+    """Event subscriber that sends query results to Discord.
+
+    This is an event subscriber - it reacts to something that already happened.
+    """
     channel = get_channel_from_cache(bot, event.discord_channel_id)
     if channel is None:
         logger.info(
@@ -74,27 +79,28 @@ async def handle_query_result(bot, event : GeminiQueryResult):
         return
 
     result_message = (
-        f"✅ Gemini query complete for <@{event.discord_user_id}>! Database response:\n"
+        f"✅ Query complete for <@{event.discord_user_id}>! Database response:\n"
         f"```json\n{event.db_response}\n```"
     )
 
     try:
         await channel.send(content=result_message)
-        logger.info(f"Sent Gemini query result to channel {event.discord_channel_id}")
+        logger.info(f"Sent query result to channel {event.discord_channel_id}")
     except Exception as e:
         logger.error(
-            f"Failed to send Gemini query result to channel {event.discord_channel_id}: {e}",
+            f"Failed to send query result to channel {event.discord_channel_id}: {e}",
             exc_info=True,
         )
 
 
-def register_discord_response_handler(dispatcher: EventDispatcher, bot) -> None:
-    """Register Discord response handler which uses primitive IDs and the bot
+def register_discord_event_handlers(dispatcher: EventDispatcher, bot) -> None:
+    """Register Discord event subscribers.
 
-    This avoids storing the full Discord `ctx` object and keeps the event
-    pipeline decoupled. The handler fetches the channel by ID when it needs
-    to send a reply.
+    These subscribers react to events and send messages back to Discord.
+    Events can have multiple subscribers.
     """
-    dispatcher.subscribe(MatchSaved, lambda event: handle_match_saved(bot, event))
-    dispatcher.subscribe(GeminiQueryResult, lambda event: handle_query_result(bot, event))
-    logger.info("Registered Discord response handler")
+    dispatcher.subscribe(MatchSaved, lambda event: handle_match_saved_event(bot, event))
+    dispatcher.subscribe(
+        QueryExecuted, lambda event: handle_query_executed_event(bot, event)
+    )
+    logger.info("Registered Discord event handlers")
