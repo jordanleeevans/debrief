@@ -48,6 +48,13 @@ MONGODB_DB=scoreboard_db
 - **`/stats`** - Upload 1-2 images (<10MB) to extract game stats
 - **`/query <prompt>`** - Natural language database queries (e.g., "Show my last 5 matches")
 
+## API Endpoints
+
+### Matches
+- **`GET /api/matches`** - List all matches (paginated, limit: 1-100, default: 10)
+
+All endpoints return JSON with match documents and metadata.
+
 ## Architecture
 
 **CQRS Pattern:**
@@ -57,12 +64,13 @@ MONGODB_DB=scoreboard_db
 - **EventDispatcher** - Multiple subscribers per event, 1:many broadcast
 
 **Key Components:**
-- `main.py` - FastAPI app, registers handlers
+- `main.py` - FastAPI app, registers handlers and bot
+- `routes.py` - RESTful API endpoints for database access
 - `services/discord.py` - Discord bot integration
 - `services/gemini.py` - Gemini AI client
 - `handlers/` - Command and event handlers
-- `repositories.py` - MongoDB data access
-- `models/schemas.py` - Pydantic models
+- `repositories.py` - MongoDB data access layer
+- `models/schemas.py` - Pydantic models with validation
 
 ## Development
 
