@@ -26,7 +26,7 @@ dev = [
 
 [tool.coverage.run]
 omit = [
-    "app/tests/mocks/*",
+    "**/tests/**",
 ]
 
 [tool.ruff]
