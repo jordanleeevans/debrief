@@ -57,17 +57,30 @@ All endpoints return JSON with match documents and metadata.
 
 ## Architecture
 
+**Process Separation:**
+- `bot.py` - Discord bot runs independently with command handlers
+- `main.py` - FastAPI server with OAuth authentication, JWT tokens, and match API
+- `docker-compose.yml` - Two services (api on port 8000, bot with no exposed ports)
+
 **CQRS Pattern:**
 - **Commands** (`/commands`) - Intent to act (AnalyzeImagesCommand, QueryDatabaseCommand)
 - **CommandBus** - Single handler per command, enforces 1:1 relationship
 - **Events** (`/events`) - Facts (GameStatsAnalyzed, MatchSaved, QueryExecuted)
 - **EventDispatcher** - Multiple subscribers per event, 1:many broadcast
 
+**API & Authentication:**
+- JWT tokens for stateless authentication (1-hour expiration)
+- Discord OAuth 2.0 for user authentication
+- Bearer token validation on protected routes
+- User data isolation (users can only access their own matches)
+
 **Key Components:**
 - `main.py` - FastAPI app, registers handlers and bot
-- `routes.py` - RESTful API endpoints for database access
-- `services/discord.py` - Discord bot integration
-- `services/gemini.py` - Gemini AI client
+- `routes.py` - Match API endpoints with pagination support
+- `auth/routes.py` - OAuth and token endpoints
+- `auth/jwt.py` - JWT token creation and verification
+- `services/discord.py` - Discord bot with slash commands
+- `services/gemini.py` - Gemini AI client for image analysis
 - `handlers/` - Command and event handlers
 - `repositories.py` - MongoDB data access layer
 - `models/schemas.py` - Pydantic models with validation
@@ -81,7 +94,7 @@ uv sync --all-extras --dev
 # Run tests
 uv run pytest
 
-# Run with coverage
+# Run tests with coverage
 uv run coverage run -m pytest
 uv run coverage report -m
 ```
