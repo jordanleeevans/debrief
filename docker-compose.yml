@@ -1,9 +1,11 @@
 version: "3.9"
 
 services:
+  # FastAPI application
   api:
     container_name: debrief_api
     build: .
+    command: ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     ports:
       - "8000:8000"
     env_file:
@@ -14,6 +16,20 @@ services:
       - .:/app
     restart: unless-stopped
 
+  # Discord bot (separate process)
+  bot:
+    container_name: debrief_bot
+    build: .
+    command: ["uv", "run", "python", "bot.py"]
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+  # MongoDB database
   mongo:
     container_name: debrief_mongo
     image: mongo:7
@@ -22,7 +38,10 @@ services:
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
+
+  # MongoDB admin UI (optional)
   mongo-express:
+    container_name: debrief_mongo_express
     image: mongo-express
     ports:
       - "8081:8081"
@@ -30,6 +49,7 @@ services:
       - mongo
     environment:
       ME_CONFIG_MONGODB_SERVER: mongo
+    restart: unless-stopped
 
 volumes:
   mongo_data:

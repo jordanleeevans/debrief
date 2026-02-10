@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Successful</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="auth-card">
+            <div class="success-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+
+            <h1>Authentication Successful!</h1>
+            <p class="subtitle">Your access token has been generated</p>
+
+            <div class="token-section">
+                <label for="token">Access Token</label>
+                <div class="token-container">
+                    <input type="text" id="token" class="token-input" value="{{ access_token }}" readonly>
+                    <button class="copy-button" onclick="copyToken()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span class="button-text">Copy</span>
+                    </button>
+                </div>
+                <div id="copy-feedback" class="copy-feedback"></div>
+            </div>
+
+            <div class="info-section">
+                <h3>Next Steps</h3>
+                <ol>
+                    <li>Copy your access token above</li>
+                    <li>Include it in your API requests as a Bearer token in the Authorization header</li>
+                    <li>Example: <code>Authorization: Bearer YOUR_TOKEN_HERE</code></li>
+                    <li>You can safely close this page now</li>
+                </ol>
+            </div>
+
+            <div class="warning-section">
+                <h4>⚠️ Security Notice</h4>
+                <p>Keep your access token secret! Never share it or commit it to version control. This token expires in <b><u>1 hour</u></b>.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToken() {
+            const tokenInput = document.getElementById('token');
+            const feedback = document.getElementById('copy-feedback');
+            const button = event.target.closest('.copy-button');
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(tokenInput.value).then(() => {
+                // Show feedback
+                feedback.textContent = '✓ Copied to clipboard!';
+                feedback.style.opacity = '1';
+
+                // Change button state
+                button.classList.add('copied');
+                const buttonText = button.querySelector('.button-text');
+                buttonText.textContent = 'Copied!';
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    feedback.style.opacity = '0';
+                    button.classList.remove('copied');
+                    buttonText.textContent = 'Copy';
+                }, 2000);
+            }).catch(err => {
+                feedback.textContent = '✗ Failed to copy';
+                feedback.style.opacity = '1';
+                console.error('Failed to copy:', err);
+            });
+        }
+    </script>
+</body>
+</html>

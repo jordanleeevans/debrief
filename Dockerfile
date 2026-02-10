@@ -15,6 +15,8 @@ RUN uv sync
 
 COPY . .
 
+# Expose port for API service (not used by bot service)
 EXPOSE 8000
 
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Default command (overridden in docker-compose.yml)
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
