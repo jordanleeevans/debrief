@@ -23,16 +23,6 @@ A Discord bot powered by Google's Gemini AI that automatically extracts and anal
 
 ---
 
-## Features
-
-- **AI-Powered OCR** - Gemini 2.5 Flash Lite extracts stats from game screenshots
-- **Discord Bot** - `!stats` and `!query` commands for analysis and database queries
-- ️**CQRS Architecture** - Clean separation of Commands and Events
-- **MongoDB Storage** - Persistent stats tracking with aggregation pipelines
-- **OAuth Authentication** - Discord OAuth 2.0 with JWT tokens
-- **Type-Safe** - Pydantic models for all data validation
-- **Hot Reload** - Docker Compose watch mode for fast development
-
 ## Quick Start
 
 **Prerequisites:** Docker, [Discord Bot Token](https://discord.com/developers/docs/intro), [Google Gemini API Key](https://aistudio.google.com/)
@@ -77,6 +67,7 @@ DISCORD_REDIRECT_URI=http://localhost:8000/auth/callback
 ## REST API
 
 **Base URL:** `http://localhost:8000`
+**Docs URL:** `http://localhost:8000/docs`
 
 ### Authentication
 - **`GET /auth/login`** - Initiate Discord OAuth flow
@@ -134,64 +125,6 @@ graph TB
 3. Handler emits Event(s)
 4. EventDispatcher notifies subscribers (1:many)
 5. Subscribers react (save to DB, send Discord message, etc.)
-
-## Development
-
-### Setup
-
-```bash
-# Install dependencies
-uv sync --all-extras --dev
-
-# Run tests
-uv run pytest
-
-# Run with coverage
-uv run pytest --cov=app --cov-report=term-missing
-
-```
-
-### Project Structure
-
-```
-app/
-├── auth/          # OAuth, JWT, authentication
-├── commands/      # Command definitions and CommandBus
-├── events/        # Event definitions and EventDispatcher
-├── handlers/      # Command handlers and event subscribers
-├── services/      # Discord bot and Gemini client
-├── models/        # Pydantic schemas and types
-├── db/            # MongoDB connection
-└── tests/         # Unit and integration tests
-```
-
-## Supported Data
-
-### Game Modes
-- Hardpoint
-- Search and Destroy
-- Overload
-
-### Maps
-- Scar
-- Raid
-- Exposure
-- Den
-- Colossus
-- Blackheart
-
-### Teams
-- Team Guild
-- JSOC
-
-### Weapons
-- M15 Mod 0
-- Peacekeeper MK1
-- Dravec 45
-- VS Recon
-- Jäger 45
-- Coda 9
-- Knife
 
 ---
 

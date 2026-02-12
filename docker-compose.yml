@@ -1,5 +1,4 @@
 services:
-  # FastAPI application
   api:
     container_name: debrief_api
     build: .
@@ -14,7 +13,6 @@ services:
       - .:/app
     restart: unless-stopped
 
-  # Discord bot (separate process)
   bot:
     container_name: debrief_bot
     build: .
@@ -23,19 +21,10 @@ services:
       - .env
     depends_on:
       - mongo
+    volumes:
+      - .:/app
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync+restart
-          path: ./app
-          target: /app/app
-        - action: sync+restart
-          path: ./bot.py
-          target: /app/bot.py
-        - action: rebuild
-          path: pyproject.toml
 
-  # MongoDB database
   mongo:
     container_name: debrief_mongo
     image: mongo:7
