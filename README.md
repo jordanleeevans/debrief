@@ -7,6 +7,8 @@
 
 A Discord bot powered by Google's Gemini AI that automatically extracts and analyzes Call of Duty: Black Ops 7 game statistics from screenshot images.
 
+[An example of a discord bot taking a request via the `!stats` command and returning a result from Gemini AI](./public/analysis-example.gif)
+
 ## Features
 
 - **AI-Powered OCR**: Gemini 2.5 Flash extracts stats from game screenshots

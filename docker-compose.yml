@@ -39,7 +39,6 @@ services:
       - mongo_data:/data/db
     restart: unless-stopped
 
-  # MongoDB admin UI (optional)
   mongo-express:
     container_name: debrief_mongo_express
     image: mongo-express
