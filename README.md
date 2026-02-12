@@ -1,7 +1,7 @@
 # Debrief
 
 ![CI](https://github.com/jordanleeevans/debrief/actions/workflows/ci.yml/badge.svg)
-![Coverage](https://codecov.io/gh/jordanleeevans/debrief/branch/main/graph/badge.svg)
+[![codecov](https://codecov.io/gh/jordanleeevans/debrief/branch/main/graph/badge.svg?token=F8WL6ZVL98)](https://codecov.io/gh/jordanleeevans/debrief)
 ![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
