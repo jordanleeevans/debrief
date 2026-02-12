@@ -9,85 +9,134 @@ A Discord bot powered by Google's Gemini AI that automatically extracts and anal
 
 ![An example of a discord bot taking a request via the `!stats` command and returning a result from Gemini AI](./public/analysis-example.gif)
 
+## Contents
+
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Discord Commands](#discord-commands)
+- [REST API](#rest-api)
+- [Architecture](#architecture)
+- [Development](#development)
+- [Supported Data](#supported-data)
+
+---
+
 ## Features
 
-- **AI-Powered OCR**: Gemini 2.5 Flash extracts stats from game screenshots
-- **Discord Commands**: `/stats` and `/query` for analysis and database queries
-- **CQRS Architecture**: Separate Command/Event handling with `CommandBus` and `EventDispatcher`
-- **MongoDB Storage**: Persistent stats tracking with aggregation support
-- **Type-Safe**: Pydantic models for all data validation
+- **AI-Powered OCR** - Gemini 2.5 Flash Lite extracts stats from game screenshots
+- **Discord Bot** - `!stats` and `!query` commands for analysis and database queries
+- ️**CQRS Architecture** - Clean separation of Commands and Events
+- **MongoDB Storage** - Persistent stats tracking with aggregation pipelines
+- **OAuth Authentication** - Discord OAuth 2.0 with JWT tokens
+- **Type-Safe** - Pydantic models for all data validation
+- **Hot Reload** - Docker Compose watch mode for fast development
 
 ## Quick Start
 
 **Prerequisites:** Docker, [Discord Bot Token](https://discord.com/developers/docs/intro), [Google Gemini API Key](https://aistudio.google.com/)
 
-1. Clone and configure:
-   ```bash
-   git clone <repository-url>
-   cd debrief
-   cp .env.example .env
-   # Edit .env with your tokens
-   ```
+```bash
+# Clone and configure
+git clone <repository-url>
+cd debrief
+cp .env.example .env
 
-2. Start with Docker:
-   ```bash
-   docker compose up --build -d
-   ```
+# Edit .env with your tokens
+# Start services
+docker compose up --build -d
+
+# Or use watch mode for development
+docker compose watch
+```
 
 ## Configuration
 
-Create `.env` with:
+Create `.env` in the project root:
+
 ```env
-DISCORD_BOT_TOKEN=your_token
-GEMINI_API_KEY=your_key
-MONGODB_URI=mongodb://admin:password@mongo:27017
+DISCORD_BOT_TOKEN=your_discord_bot_token
+GEMINI_API_KEY=your_gemini_api_key
+MONGODB_URI=mongodb://mongo:27017
 MONGODB_DB=scoreboard_db
+JWT_SECRET_KEY=your_secret_key_here
+DISCORD_CLIENT_ID=your_discord_client_id
+DISCORD_CLIENT_SECRET=your_discord_client_secret
+DISCORD_REDIRECT_URI=http://localhost:8000/auth/callback
 ```
 
-## Commands
+## Discord Commands
 
-- **`/ping`** - Health check
-- **`/stats`** - Upload 1-2 images (<10MB) to extract game stats
-- **`/query <prompt>`** - Natural language database queries (e.g., "Show my last 5 matches")
+| Command | Description | Usage |
+|---------|-------------|-------|
+| `!ping` | Health check | `!ping` |
+| `!stats` | Extract stats from screenshots (1-2 images, <10MB each) | `!stats` + attach images |
+| `!query` | Natural language database queries | `!query how many kills on Raid?` |
 
-## API Endpoints
+## REST API
 
-### Matches
-- **`GET /api/matches`** - List all matches (paginated, limit: 1-100, default: 10)
+**Base URL:** `http://localhost:8000`
 
-All endpoints return JSON with match documents and metadata.
+### Authentication
+- **`GET /auth/login`** - Initiate Discord OAuth flow
+- **`GET /auth/callback`** - OAuth callback (redirected from Discord)
+
+### Matches (Protected)
+- **`GET /api/matches`** - List user's matches
+  - Query params: `limit` (1-100, default: 10), `skip` (default: 0)
+  - Requires: `Authorization: Bearer <jwt_token>`
 
 ## Architecture
 
-**Process Separation:**
-- `bot.py` - Discord bot runs independently with command handlers
-- `main.py` - FastAPI server with OAuth authentication, JWT tokens, and match API
-- `docker-compose.yml` - Two services (api on port 8000, bot with no exposed ports)
+### Process Separation
 
-**CQRS Pattern:**
-- **Commands** (`/commands`) - Intent to act (AnalyzeImagesCommand, QueryDatabaseCommand)
-- **CommandBus** - Single handler per command, enforces 1:1 relationship
-- **Events** (`/events`) - Facts (GameStatsAnalyzed, MatchSaved, QueryExecuted)
-- **EventDispatcher** - Multiple subscribers per event, 1:many broadcast
+```mermaid
+graph TB
+    subgraph Discord["Discord Bot (bot.py)"]
+        CMD[Commands]
+        EVT[Events]
+    end
+    
+    subgraph API["FastAPI App (main.py)"]
+        REST[REST API]
+        AUTH[OAuth/JWT]
+    end
+    
+    DB[(MongoDB)]
+    
+    Discord <--> DB
+    API <--> DB
+    
+    style Discord fill:#5865F2,stroke:#4752C4,color:#fff
+    style API fill:#009688,stroke:#00796B,color:#fff
+    style DB fill:#47A248,stroke:#3E8E41,color:#fff
+```
 
-**API & Authentication:**
-- JWT tokens for stateless authentication (1-hour expiration)
-- Discord OAuth 2.0 for user authentication
-- Bearer token validation on protected routes
-- User data isolation (users can only access their own matches)
+- **bot.py** - Discord bot process with command handlers
+- **main.py** - FastAPI REST API with OAuth and JWT authentication
+- **MongoDB** - Shared database for both services
 
-**Key Components:**
-- `main.py` - FastAPI app, registers handlers and bot
-- `routes.py` - Match API endpoints with pagination support
-- `auth/routes.py` - OAuth and token endpoints
-- `auth/jwt.py` - JWT token creation and verification
-- `services/discord.py` - Discord bot with slash commands
-- `services/gemini.py` - Gemini AI client for image analysis
-- `handlers/` - Command and event handlers
-- `repositories.py` - MongoDB data access layer
-- `models/schemas.py` - Pydantic models with validation
+### CQRS Pattern
+
+**Commands**
+- `AnalyzeImagesCommand` → Analyze game screenshots
+- `QueryDatabaseCommand` → Query match database
+
+**Events**
+- `GameStatsAnalyzed` → Stats extracted from images
+- `MatchSaved` → Match persisted to database
+- `QueryExecuted` → Database query completed
+
+**Flow:**
+1. Discord command → Command created
+2. CommandBus executes handler (1:1)
+3. Handler emits Event(s)
+4. EventDispatcher notifies subscribers (1:many)
+5. Subscribers react (save to DB, send Discord message, etc.)
 
 ## Development
+
+### Setup
 
 ```bash
 # Install dependencies
@@ -96,46 +145,53 @@ uv sync --all-extras --dev
 # Run tests
 uv run pytest
 
-# Run tests with coverage
-uv run coverage run -m pytest
-uv run coverage report -m
+# Run with coverage
+uv run pytest --cov=app --cov-report=term-missing
+
+```
+
+### Project Structure
+
+```
+app/
+├── auth/          # OAuth, JWT, authentication
+├── commands/      # Command definitions and CommandBus
+├── events/        # Event definitions and EventDispatcher
+├── handlers/      # Command handlers and event subscribers
+├── services/      # Discord bot and Gemini client
+├── models/        # Pydantic schemas and types
+├── db/            # MongoDB connection
+└── tests/         # Unit and integration tests
 ```
 
 ## Supported Data
 
-### Maps
-| Maps |
-| --- |
-| SCAR |
-| RAID |
-| EXPOSURE |
-| DEN |
-| COLOSSUS |
-| BLACKHEART |
+### Game Modes
+- Hardpoint
+- Search and Destroy
+- Overload
 
-### Modes
-| Modes |
-| --- |
-| HARDPOINT |
-| SEARCH AND DESTROY |
-| OVERLOAD |
+### Maps
+- Scar
+- Raid
+- Exposure
+- Den
+- Colossus
+- Blackheart
 
 ### Teams
-| Teams |
-| --- |
-| TEAM GUILD |
-| JSOC |
+- Team Guild
+- JSOC
 
 ### Weapons
-| Weapons |
-| --- |
-| M15 MOD 0 |
-| PEACEKEEPER MK1 |
-| DRAVEC 45 |
-| VS RECON |
-| JÄGER 45 |
-| CODA 9 |
+- M15 Mod 0
+- Peacekeeper MK1
+- Dravec 45
+- VS Recon
+- Jäger 45
+- Coda 9
+- Knife
 
 ---
 
-**Tech Stack:** FastAPI · Discord.py · Pydantic · MongoDB · Google Gemini · pytest
+**Tech Stack:** FastAPI · Discord.py · Pydantic · MongoDB · Google Gemini · Docker · pytest

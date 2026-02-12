@@ -1,5 +1,6 @@
 from google import genai
 from google.genai import types
+import json
 from app.models.schemas import GameStatsResponse, MongoPipeline, MatchDocument
 
 MATCH_ANALYSIS_PROMPT = """
@@ -30,6 +31,7 @@ Rules:
 - Output only the MongoDB aggregation pipeline stages as a JSON array, without any additional text or explanation. The output should be directly usable in a MongoDB aggregate() function.
 - Allowed aggregation operators are: $match, $group, $project, $sort, $limit, $skip, and $unwind.
 - No writes, deletes, or updates - only reads using aggregation pipelines.
+- CRITICAL: Every $group stage MUST include an "_id" field. Use "_id": null for aggregations across all documents, or specify a grouping field like "_id": "$field_name".
 
 Generate a MongoDB aggregation pipeline based on the following user request:
 """ % (
@@ -89,4 +91,5 @@ class GeminiClient:
                     response_json_schema=MongoPipeline.model_json_schema(),
                 ),
             )
-            return response.model_dump_json()
+            # Return the parsed pipeline dict from the response
+            return response.parsed

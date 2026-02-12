@@ -77,8 +77,6 @@ async def handle_query_database_command(
 
         logger.info(f"MongoDB aggregation result: {result}")
 
-        logger.info(f"MongoDB aggregation result: {result}")
-
         # Emit QueryExecuted EVENT for other handlers to process
         query_executed_event = QueryExecuted(
             query=command.query,
