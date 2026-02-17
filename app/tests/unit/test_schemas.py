@@ -4,9 +4,9 @@ import pytest
 pytest.importorskip("pydantic")
 from pydantic import ValidationError
 
-from app.models import schemas
-from app.models.enums import GameModes, Maps, Teams
-from app.models.schemas import HardpointGameStats, HardpointScoreboard, WeaponStats
+from app.shared.models import schemas
+from app.shared.models.enums import GameModes, Maps, Teams
+from app.shared.models.schemas import HardpointGameStats, HardpointScoreboard, WeaponStats
 
 
 def test_weaponstats_valid_and_invalid():

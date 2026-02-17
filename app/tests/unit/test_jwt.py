@@ -5,8 +5,8 @@ import pytest
 
 pytest.importorskip('pydantic')
 
-from app.auth.jwt import TokenData, create_access_token, verify_token
-from app.core.settings import settings
+from app.shared.auth.jwt import TokenData, create_access_token, verify_token
+from app.shared.core.settings import settings
 
 
 class TestCreateAccessToken:

@@ -6,9 +6,9 @@ pytest.importorskip('fastapi')
 
 from fastapi.testclient import TestClient
 
-from app.auth.jwt import create_access_token
-from app.main import app
-from app.routes import get_match_repository
+from app.shared.auth.jwt import create_access_token
+from app.api.main import app
+from app.api.routes import get_match_repository
 from app.tests.mocks import FakeMatchRepository
 
 
@@ -34,7 +34,7 @@ class TestMatchesEndpointsAuthentication:
 
 		import jwt
 
-		from app.core.settings import settings
+		from app.shared.core.settings import settings
 
 		expired_payload = {
 			'discord_user_id': 123456789,

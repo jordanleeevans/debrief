@@ -3,8 +3,8 @@ import pytest
 # Skip if discord isn't installed in the test environment
 pytest.importorskip('discord')
 
-import app.services.discord as dc
-from app.commands import AnalyzeImagesCommand, QueryDatabaseCommand
+import app.shared.services.discord as dc
+from app.bot.commands import AnalyzeImagesCommand, QueryDatabaseCommand
 from app.tests.mocks import FakeAttachment, FakeCtx
 
 

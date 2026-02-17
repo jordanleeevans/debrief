@@ -7,7 +7,7 @@ pytest.importorskip('fastapi')
 
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.api.main import app
 
 
 class TestDiscordOAuthEndpoint:
@@ -49,8 +49,8 @@ class TestDiscordOAuthCallbackEndpoint:
 			response = client.get('/api/auth/discord/callback')
 			assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
-	@patch('app.auth.routes.exchange_code_for_token')
-	@patch('app.auth.routes.get_discord_user')
+	@patch('app.shared.auth.routes.exchange_code_for_token')
+	@patch('app.shared.auth.routes.get_discord_user')
 	def test_discord_callback_success(self, mock_get_user, mock_exchange_code):
 		"""Test successful OAuth flow through callback"""
 
@@ -69,7 +69,7 @@ class TestDiscordOAuthCallbackEndpoint:
 		assert response.status_code == HTTPStatus.OK
 		assert 'text/html' in response.headers.get('content-type', '')
 
-	@patch('app.auth.routes.exchange_code_for_token')
+	@patch('app.shared.auth.routes.exchange_code_for_token')
 	def test_discord_callback_code_exchange_failure(self, mock_exchange_code):
 		"""Test that callback returns 400 when code exchange fails"""
 
@@ -83,8 +83,8 @@ class TestDiscordOAuthCallbackEndpoint:
 
 		assert response.status_code == HTTPStatus.BAD_REQUEST
 
-	@patch('app.auth.routes.exchange_code_for_token')
-	@patch('app.auth.routes.get_discord_user')
+	@patch('app.shared.auth.routes.exchange_code_for_token')
+	@patch('app.shared.auth.routes.get_discord_user')
 	def test_discord_callback_user_fetch_failure(self, mock_get_user, mock_exchange_code):
 		"""Test that callback returns 400 when user fetch fails"""
 
@@ -102,8 +102,8 @@ class TestDiscordOAuthCallbackEndpoint:
 
 		assert response.status_code == HTTPStatus.BAD_REQUEST
 
-	@patch('app.auth.routes.exchange_code_for_token')
-	@patch('app.auth.routes.get_discord_user')
+	@patch('app.shared.auth.routes.exchange_code_for_token')
+	@patch('app.shared.auth.routes.get_discord_user')
 	def test_discord_callback_invalid_user_id(self, mock_get_user, mock_exchange_code):
 		"""Test that callback returns 400 when user ID is missing"""
 
@@ -121,8 +121,8 @@ class TestDiscordOAuthCallbackEndpoint:
 
 		assert response.status_code == HTTPStatus.BAD_REQUEST
 
-	@patch('app.auth.routes.exchange_code_for_token')
-	@patch('app.auth.routes.get_discord_user')
+	@patch('app.shared.auth.routes.exchange_code_for_token')
+	@patch('app.shared.auth.routes.get_discord_user')
 	def test_discord_callback_returns_html_page(self, mock_get_user, mock_exchange_code):
 		"""Test that callback returns HTML page with token"""
 

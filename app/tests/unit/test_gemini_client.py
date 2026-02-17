@@ -1,8 +1,8 @@
 from pydantic import TypeAdapter
 import pydantic
 import pytest
-from app.services.gemini import GeminiClient, MATCH_ANALYSIS_PROMPT, DB_QUERY_PROMPT
-from app.models.schemas import (
+from app.shared.services.gemini import GeminiClient, MATCH_ANALYSIS_PROMPT, DB_QUERY_PROMPT
+from app.shared.models.schemas import (
     ALLOWED_AGGREGATION_OPERATORS,
     GameStatsResponse,
     MongoPipeline,

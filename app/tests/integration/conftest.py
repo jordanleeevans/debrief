@@ -23,7 +23,7 @@ def mock_bot_for_integration_tests():
 	fake_bot = FakeBot()
 
 	# Import the real module to get command functions
-	import app.services.discord as dc
+	import app.shared.services.discord as dc
 
 	# Register the commands on the fake bot
 	fake_bot.add_command('ping', dc.ping)
@@ -31,6 +31,6 @@ def mock_bot_for_integration_tests():
 	fake_bot.add_command('query', dc.query)
 
 	# Mock the bot module
-	with patch('app.services.discord.bot', fake_bot):
+	with patch('app.shared.services.discord.bot', fake_bot):
 		logger.info('Discord bot mocked - test will run without connecting to Discord')
 		yield fake_bot

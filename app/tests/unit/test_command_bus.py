@@ -1,5 +1,5 @@
 import pytest
-from app.commands import CommandBus, AnalyzeImagesCommand, QueryDatabaseCommand
+from app.bot.commands import CommandBus, AnalyzeImagesCommand, QueryDatabaseCommand
 
 
 class TestCommandBusInit:

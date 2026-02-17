@@ -1,6 +1,6 @@
 import pytest
-from app.events import EventDispatcher, GameStatsAnalyzed, MatchSaved
-from app.models.schemas import GameStatsResponse
+from app.bot.events import EventDispatcher, GameStatsAnalyzed, MatchSaved
+from app.shared.models.schemas import GameStatsResponse
 from app.tests.mocks import FakeGeminiClient
 
 

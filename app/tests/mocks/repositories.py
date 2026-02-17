@@ -1,4 +1,4 @@
-from app.models.schemas import MatchDocument, MongoPipeline
+from app.shared.models.schemas import MatchDocument, MongoPipeline
 
 
 class FakeMatchRepository:

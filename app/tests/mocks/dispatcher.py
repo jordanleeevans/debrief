@@ -1,5 +1,5 @@
 from typing import Any
-from app.events import EventDispatcher
+from app.bot.events import EventDispatcher
 
 
 class FakeEventDispatcher(EventDispatcher):

@@ -1,7 +1,7 @@
-from app.models.schemas import GameStatsResponse
-from app.services.gemini import GeminiClient
-from app.models.enums import AssaultRifles, Pistols, Maps, GameModes, Teams
-from app.models.schemas import (
+from app.shared.models.schemas import GameStatsResponse
+from app.shared.services.gemini import GeminiClient
+from app.shared.models.enums import AssaultRifles, Pistols, Maps, GameModes, Teams
+from app.shared.models.schemas import (
     PrimaryWeaponStats,
     SecondaryWeaponStats,
     MeleeWeaponStats,

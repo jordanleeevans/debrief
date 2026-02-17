@@ -1,13 +1,13 @@
 import pytest
-from app.commands import AnalyzeImagesCommand, QueryDatabaseCommand
-from app.events.events import GameStatsAnalyzed, QueryExecuted
+from app.bot.commands import AnalyzeImagesCommand, QueryDatabaseCommand
+from app.bot.events.events import GameStatsAnalyzed, QueryExecuted
 from app.tests.mocks import FakeGeminiClient, FakeEventDispatcher
 
 
 def test_register_gemini_command_handlers():
     """Test that the Gemini command handlers are registered correctly"""
-    from app.handlers.gemini import register_gemini_command_handlers
-    from app.commands import CommandBus
+    from app.bot.handlers.gemini import register_gemini_command_handlers
+    from app.bot.commands import CommandBus
 
     dispatcher = FakeEventDispatcher()
     command_bus = CommandBus()
@@ -23,7 +23,7 @@ def test_register_gemini_command_handlers():
 @pytest.mark.asyncio
 async def test_handle_analyze_images_command_emits_game_stats_analyzed():
     """Test that the analyze images command handler emits GameStatsAnalyzed event"""
-    from app.handlers.gemini import handle_analyze_images_command
+    from app.bot.handlers.gemini import handle_analyze_images_command
 
     dispatcher = FakeEventDispatcher()
     client = FakeGeminiClient
@@ -49,7 +49,7 @@ async def test_handle_analyze_images_command_emits_game_stats_analyzed():
 @pytest.mark.asyncio
 async def test_handle_query_database_command_emits_query_executed():
     """Test that the query database command handler emits QueryExecuted event"""
-    from app.handlers.gemini import handle_query_database_command
+    from app.bot.handlers.gemini import handle_query_database_command
     from app.tests.mocks import FakeMatchRepository
 
     dispatcher = FakeEventDispatcher()
