@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-A Discord bot powered by Google's Gemini AI that automatically extracts and analyzes Call of Duty: Black Ops 7 game statistics from screenshot images.
+A Discord bot powered by Google's Gemini AI that extracts and analyzes Call of Duty: Black Ops 7 game statistics from screenshot images.
 
 ![An example of the discord bot taking a request via the `!stats` command and returning a result from Gemini AI](./public/analysis-example.gif)
 ![An example of the discord bot taking a request via the `!query` command and returning a result from the database, using natural language, leveraging Gemini AI](./public/query-example.gif)
@@ -18,8 +18,6 @@ A Discord bot powered by Google's Gemini AI that automatically extracts and anal
 - [Discord Commands](#discord-commands)
 - [REST API](#rest-api)
 - [Architecture](#architecture)
-- [Development](#development)
-- [Supported Data](#supported-data)
 
 ---
 
